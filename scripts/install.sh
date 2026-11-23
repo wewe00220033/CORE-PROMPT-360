@@ -7,6 +7,7 @@ SKILL_NAME="00-lock360-zero-gaps"
 TARGET_ROOT="${HOME}/.gemini"
 WITH_WORKFLOW=0
 WITH_RULE=0
+WITH_PACK=0
 UNINSTALL=0
 
 while [ "$#" -gt 0 ]; do
@@ -14,6 +15,7 @@ while [ "$#" -gt 0 ]; do
     --all) WITH_WORKFLOW=1; WITH_RULE=1 ;;
     --with-workflow) WITH_WORKFLOW=1 ;;
     --with-rule) WITH_RULE=1 ;;
+    --with-pack) WITH_PACK=1 ;;
     --uninstall) UNINSTALL=1 ;;
     --target)
       shift
@@ -21,7 +23,7 @@ while [ "$#" -gt 0 ]; do
       TARGET_ROOT="$1"
       ;;
     -h|--help)
-      echo "Usage: bash scripts/install.sh [--all | --with-workflow | --with-rule | --uninstall] [--target DIR]"
+      echo "Usage: bash scripts/install.sh [--all | --with-workflow | --with-rule] [--with-pack] [--uninstall] [--target DIR]"
       exit 0
       ;;
     *)
@@ -69,7 +71,7 @@ path, mode, skill_path = sys.argv[1], sys.argv[2], sys.argv[3]
 start = "<!-- LOCK360_START -->"
 end = "<!-- LOCK360_END -->"
 snippet = """<!-- LOCK360_START -->
-## 🔒 بروتوكول التقفيل الشامل 360° (Lock360 v2.4)
+## 🔒 بروتوكول التقفيل الشامل 360° (Lock360 v2.5)
 
 - **المصدر الموحد:** `00-lock360-zero-gaps` (`__LOCK360_SKILL_PATH__` · `gist/01-CORE-PROMPT-360-v2.md` · `workflows/00-lock360-zero-gaps.md`).
 - **`L1 Auto-Guard` (`P` تلقائياً بعد الأعمال غير التافهة):** راجع المتبقي/الحدود، أمان التسليم والتزامن، الدليل القاطع بعد آخر تعديل، واسأل المستخدم عن أي غموض بدل التخمين.
@@ -127,6 +129,139 @@ if sc != ec or sc > 1:
 PY
 }
 
+PACK_ROOT="${REPO_ROOT}/skills-pack"
+
+install_pack() {
+  if [ ! -d "$PACK_ROOT" ]; then
+    echo "error: skills-pack directory not found at $PACK_ROOT" >&2
+    exit 2
+  fi
+  local bak_root="${TARGET_ROOT}/.backup_lock360_pack_$(date +%Y%m%d_%H%M%S)"
+  local bak_used=0
+  local skills_dst_root="${TARGET_ROOT}/config/skills"
+  local wf_dst_root="${TARGET_ROOT}/config/workflows"
+  local rules_dst_root="${TARGET_ROOT}/config/rules"
+  local sc=0 wc=0 rc=0
+
+  if [ -d "${PACK_ROOT}/skills" ]; then
+    mkdir -p "$skills_dst_root"
+    for d in "${PACK_ROOT}/skills"/*/; do
+      [ -d "$d" ] || continue
+      local name; name="$(basename "${d%/}")"
+      local dst="${skills_dst_root}/${name}"
+      if [ -d "$dst" ]; then
+        mkdir -p "${bak_root}/skills"
+        cp -R "$dst" "${bak_root}/skills/${name}"
+        bak_used=1
+        rm -rf "$dst"
+      fi
+      cp -R "${d%/}" "$dst"
+      sc=$((sc + 1))
+    done
+  fi
+
+  if [ -d "${PACK_ROOT}/workflows" ]; then
+    mkdir -p "$wf_dst_root"
+    for f in "${PACK_ROOT}/workflows"/*; do
+      [ -f "$f" ] || continue
+      local name; name="$(basename "$f")"
+      local dst="${wf_dst_root}/${name}"
+      if [ -f "$dst" ]; then
+        mkdir -p "${bak_root}/workflows"
+        cp "$dst" "${bak_root}/workflows/${name}"
+        bak_used=1
+      fi
+      cp "$f" "$dst"
+      wc=$((wc + 1))
+    done
+  fi
+
+  if [ -d "${PACK_ROOT}/rules" ]; then
+    mkdir -p "$rules_dst_root"
+    for f in "${PACK_ROOT}/rules"/*; do
+      [ -f "$f" ] || continue
+      local name; name="$(basename "$f")"
+      local dst="${rules_dst_root}/${name}"
+      if [ -f "$dst" ]; then
+        mkdir -p "${bak_root}/rules"
+        cp "$dst" "${bak_root}/rules/${name}"
+        bak_used=1
+      fi
+      cp "$f" "$dst"
+      rc=$((rc + 1))
+    done
+  fi
+
+  [ "$bak_used" -eq 1 ] && echo "[lock360] Backed up existing pack targets to: $bak_root"
+  echo "[lock360] Installed skills-pack: skills=${sc} workflows=${wc} rules=${rc}"
+
+  if [ "$WITH_RULE" -eq 1 ] && [ -f "${PACK_ROOT}/GEMINI.template.md" ]; then
+    if [ ! -f "$GEMINI_FILE" ]; then
+      mkdir -p "$(dirname "$GEMINI_FILE")"
+      cp "${PACK_ROOT}/GEMINI.template.md" "$GEMINI_FILE"
+      echo "[lock360] Seeded new GEMINI.md from sanitized skills-pack/GEMINI.template.md"
+    else
+      echo "[lock360] Existing GEMINI.md preserved (sanitized template available at skills-pack/GEMINI.template.md)"
+    fi
+  fi
+}
+
+uninstall_pack() {
+  if [ ! -d "$PACK_ROOT" ]; then
+    echo "[lock360] Warning: skills-pack not found in repo; skipping pack uninstall."
+    return 0
+  fi
+  local bak_root="${TARGET_ROOT}/.backup_lock360_pack_uninstall_$(date +%Y%m%d_%H%M%S)"
+  local bak_used=0
+  local skills_dst_root="${TARGET_ROOT}/config/skills"
+  local wf_dst_root="${TARGET_ROOT}/config/workflows"
+  local rules_dst_root="${TARGET_ROOT}/config/rules"
+
+  if [ -d "${PACK_ROOT}/skills" ]; then
+    for d in "${PACK_ROOT}/skills"/*/; do
+      [ -d "$d" ] || continue
+      local name; name="$(basename "${d%/}")"
+      local dst="${skills_dst_root}/${name}"
+      if [ -d "$dst" ]; then
+        mkdir -p "${bak_root}/skills"
+        cp -R "$dst" "${bak_root}/skills/${name}"
+        bak_used=1
+        rm -rf "$dst"
+      fi
+    done
+  fi
+
+  if [ -d "${PACK_ROOT}/workflows" ]; then
+    for f in "${PACK_ROOT}/workflows"/*; do
+      [ -f "$f" ] || continue
+      local name; name="$(basename "$f")"
+      local dst="${wf_dst_root}/${name}"
+      if [ -f "$dst" ]; then
+        mkdir -p "${bak_root}/workflows"
+        cp "$dst" "${bak_root}/workflows/${name}"
+        bak_used=1
+        rm -f "$dst"
+      fi
+    done
+  fi
+
+  if [ -d "${PACK_ROOT}/rules" ]; then
+    for f in "${PACK_ROOT}/rules"/*; do
+      [ -f "$f" ] || continue
+      local name; name="$(basename "$f")"
+      local dst="${rules_dst_root}/${name}"
+      if [ -f "$dst" ]; then
+        mkdir -p "${bak_root}/rules"
+        cp "$dst" "${bak_root}/rules/${name}"
+        bak_used=1
+        rm -f "$dst"
+      fi
+    done
+  fi
+
+  [ "$bak_used" -eq 1 ] && echo "[lock360] Backed up and removed skills-pack targets (backup: $bak_root)"
+}
+
 if [ "$UNINSTALL" -eq 1 ]; then
   validate_gemini_markers
   if [ -d "$SKILL_DST" ]; then
@@ -137,6 +272,7 @@ if [ "$UNINSTALL" -eq 1 ]; then
     rm -rf "$SKILL_DST"
   fi
   rm -f "$WF_DST"
+  [ "$WITH_PACK" -eq 1 ] && uninstall_pack
   update_gemini_block "remove"
   echo "[lock360] Uninstalled cleanly from: $TARGET_ROOT"
   exit 0
@@ -165,6 +301,10 @@ if [ "$WITH_WORKFLOW" -eq 1 ] && [ -f "$REPO_ROOT/workflows/00-lock360-zero-gaps
   mkdir -p "$(dirname "$WF_DST")"
   cp "$REPO_ROOT/workflows/00-lock360-zero-gaps.md" "$WF_DST"
   echo "[lock360] Installed workflow to: $WF_DST"
+fi
+
+if [ "$WITH_PACK" -eq 1 ]; then
+  install_pack
 fi
 
 if [ "$WITH_RULE" -eq 1 ]; then

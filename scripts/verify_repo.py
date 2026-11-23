@@ -17,7 +17,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SELF_REL = "scripts/verify_repo.py"
 
 TEXT_EXTS = {".md", ".sh", ".py", ".yml", ".yaml", ".snippet", ".mdc",
-             ".gitattributes", ".gitignore"}
+             ".json", ".svg", ".gitattributes", ".gitignore"}
 TEXT_NAMES = {"VERSION", "LICENSE", ".gitattributes", ".gitignore"}
 
 RESULTS = []  # (status, check, message)
@@ -120,15 +120,29 @@ def check_ps1_ascii():
     return 0
 
 
+def is_pack_asset(rel):
+    return (rel.startswith("skills-pack/skills/")
+            or rel.startswith("skills-pack/workflows/")
+            or rel.startswith("skills-pack/rules/"))
+
+
+def is_pack_md(rel):
+    return is_pack_asset(rel) or rel == "skills-pack/GEMINI.template.md"
+
+
 # ---------------------------------------------------------------- (d) forbidden
-def forbidden_patterns():
-    # Regexes are assembled from string pieces so this file never matches itself.
+SAFE_APIKEY_ENV_RE = re.compile(r"api[_-]?key\s*[:=]\s*(?:process\.env\.|os\.environ|env\.|\$\{|<\w)", re.I)
+
+
+def universal_forbidden_patterns():
+    # Enforced across 100% of tracked files including skills-pack/.
     pats = [
-        ("machine-path-win-users", r"C:\\Us" + r"ers\\"),
+        ("machine-path-win-users", r"C:\\+Us" + r"ers\\"),
         ("machine-path-mac-users", "/Us" + "ers/"),
         ("machine-path-home", r"(?<!~)/ho" + r"me/[a-z]+/"),
         ("owner-name", "Zi" + "zo"),
-        ("project-drive", r"D:\\S" + "MS"),
+        ("project-drive", r"D:\\+S" + "MS"),
+        ("project-codename", "hRh" + "R"),
         ("owner-codename", "PHOE" + "NIX"),
         ("brain-id", "115a5" + "a36"),
         ("brain-path", "antigra" + r"vity[\\/]brain"),
@@ -136,7 +150,20 @@ def forbidden_patterns():
         ("secret-github", r"ghp_[A-Za-z0-9]{20,}"),
         ("secret-bearer", r"Bearer\s+[A-Za-z0-9._-]{16,}"),
         ("secret-bot-token", r"\b\d{8,10}:[A-Za-z0-9_-]{35}\b"),
+        ("personal-tg-chat", "11242" + "47595"),
+        ("personal-tg-bot", "sheets2025" + "from_bot"),
         ("secret-api-key", r"api[_-]?key\s*[:=]\s*\S{8,}"),
+    ]
+    compiled = []
+    for name, pat in pats:
+        flags = re.I if name == "secret-api-key" else 0
+        compiled.append((name, re.compile(pat, flags)))
+    return compiled
+
+
+def core_forbidden_patterns():
+    # Enforced only on Lock360 core (outside skills-pack/).
+    pats = [
         ("leak-4096", "40" + "96"),
         ("leak-24kb", "24" + "KB"),
         ("leak-frida", "fri" + "da"),
@@ -146,11 +173,7 @@ def forbidden_patterns():
         ("leak-session", r"\.sess" + r"ion\b"),
         ("leak-telegram", "Tele" + "gram"),
     ]
-    compiled = []
-    for name, pat in pats:
-        flags = re.I if name == "secret-api-key" else 0
-        compiled.append((name, re.compile(pat, flags)))
-    return compiled
+    return [(name, re.compile(pat)) for name, pat in pats]
 
 
 SIBLING_SKILLS = [
@@ -158,12 +181,18 @@ SIBLING_SKILLS = [
     "01-micro-tasker", "02-planning-system", "00-evidence-inspector",
     "egm-review", "everything-search",
 ]
-SIBLING_WHITELIST = ("SKILL.md", "workflows/00-lock360-zero-gaps.md")
+SIBLING_WHITELIST = (
+    "SKILL.md",
+    "workflows/00-lock360-zero-gaps.md",
+    "skills-pack/README.md",
+    ".github/workflows/verify.yml",
+)
 
 
 def check_forbidden(files):
     bad = 0
-    pats = forbidden_patterns()
+    uni_pats = universal_forbidden_patterns()
+    core_pats = core_forbidden_patterns()
     sibling_re = re.compile("|".join(re.escape(s) for s in SIBLING_SKILLS))
     scanned = 0
     for rel in files:
@@ -171,16 +200,24 @@ def check_forbidden(files):
             continue
         scanned += 1
         text = read_text(rel)
+        in_pack = rel.startswith("skills-pack/")
         lines = text.split("\n")
         for lineno, line in enumerate(lines, 1):
-            for name, rx in pats:
+            for name, rx in uni_pats:
+                if name == "secret-api-key" and SAFE_APIKEY_ENV_RE.search(line):
+                    continue
                 if rx.search(line):
                     bad += 1
                     report("FAIL", "d", "%s:%d forbidden pattern [%s]" % (rel, lineno, name))
-            if rel not in SIBLING_WHITELIST and sibling_re.search(line):
-                bad += 1
-                report("FAIL", "d", "%s:%d sibling skill name allowed only in SKILL.md / workflows/00-lock360-zero-gaps.md"
-                       % (rel, lineno))
+            if not in_pack:
+                for name, rx in core_pats:
+                    if rx.search(line):
+                        bad += 1
+                        report("FAIL", "d", "%s:%d forbidden pattern [%s]" % (rel, lineno, name))
+                if rel not in SIBLING_WHITELIST and sibling_re.search(line):
+                    bad += 1
+                    report("FAIL", "d", "%s:%d sibling skill name not allowed outside whitelist"
+                           % (rel, lineno))
     if not bad:
         report("PASS", "d", "no forbidden patterns in %d files" % scanned)
     return bad
@@ -195,7 +232,7 @@ def check_links(files):
     bad = 0
     checked = 0
     for rel in files:
-        if not rel.lower().endswith(".md"):
+        if not rel.lower().endswith(".md") or is_pack_md(rel):
             continue
         base_dir = os.path.dirname(os.path.join(ROOT, rel))
         in_fence = False
@@ -244,7 +281,7 @@ def check_version(files):
     for rel in files:
         if not (is_text(rel) or is_ps1(rel)):
             continue
-        if rel == "gist/04-CHANGELOG.md" or rel.startswith("archive/"):
+        if rel == "gist/04-CHANGELOG.md" or rel.startswith("archive/") or is_pack_asset(rel):
             continue
         for lineno, line in enumerate(read_text(rel).split("\n"), 1):
             for m in VERSION_RE.finditer(line):
@@ -375,7 +412,7 @@ def check_md_tables(files):
     bad = 0
     checked = 0
     for rel in files:
-        if not rel.lower().endswith(".md"):
+        if not rel.lower().endswith(".md") or is_pack_md(rel):
             continue
         checked += 1
         for lineno, line in enumerate(read_text(rel).split("\n"), 1):

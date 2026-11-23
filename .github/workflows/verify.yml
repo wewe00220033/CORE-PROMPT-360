@@ -53,6 +53,31 @@ jobs:
           sys.exit(0 if (s, e) == (0, 0) else 1)
           PY
 
+      - name: Full skills-pack round-trip (bash)
+        run: |
+          set -euo pipefail
+          TARGET="$RUNNER_TEMP/lock360_pack"
+          bash scripts/install.sh --all --with-pack --target "$TARGET"
+          test -f "$TARGET/config/skills/00-lock360-zero-gaps/SKILL.md"
+          test -f "$TARGET/config/skills/00-architect-sre/SKILL.md"
+          test -f "$TARGET/config/skills/everything-search/SKILL.md"
+          test -f "$TARGET/config/skills/egm-review/SKILL.md"
+          test -f "$TARGET/config/skills/neon/SKILL.md"
+          test -f "$TARGET/config/workflows/00-architect-sre.md"
+          test -f "$TARGET/config/rules/arabic_keyboard_shortcuts.md"
+          test -f "$TARGET/GEMINI.md"
+          bash scripts/install.sh --uninstall --with-pack --target "$TARGET"
+          test ! -d "$TARGET/config/skills/00-lock360-zero-gaps"
+          test ! -d "$TARGET/config/skills/00-architect-sre"
+          test ! -d "$TARGET/config/skills/neon"
+          test ! -f "$TARGET/config/workflows/00-architect-sre.md"
+          test ! -f "$TARGET/config/rules/arabic_keyboard_shortcuts.md"
+          python3 - "$TARGET/GEMINI.md" <<'PY'
+          import sys
+          txt = open(sys.argv[1], encoding="utf-8").read()
+          assert txt.count("<!-- LOCK360_START -->") == 0 and txt.count("<!-- LOCK360_END -->") == 0
+          PY
+
   windows:
     runs-on: windows-latest
     defaults:
@@ -91,3 +116,37 @@ jobs:
           $e = ([regex]::Matches($txt, [regex]::Escape("<!-- LOCK360_END -->"))).Count
           Write-Host "markers after uninstall: start=$s end=$e"
           if (($s -ne 0) -or ($e -ne 0)) { throw "expected zero LOCK360 markers after uninstall" }
+
+      - name: Full skills-pack round-trip (Windows PowerShell 5.1)
+        run: |
+          $ErrorActionPreference = "Stop"
+          $target = Join-Path $env:RUNNER_TEMP "lock360_pack"
+          powershell -NoProfile -ExecutionPolicy Bypass -File scripts\install.ps1 -All -WithPack -TargetRoot $target
+          if ($LASTEXITCODE -ne 0) { throw "install.ps1 -All -WithPack exited with $LASTEXITCODE" }
+          foreach ($rel in @(
+            "config\skills\00-lock360-zero-gaps\SKILL.md",
+            "config\skills\00-architect-sre\SKILL.md",
+            "config\skills\everything-search\SKILL.md",
+            "config\skills\egm-review\SKILL.md",
+            "config\skills\neon\SKILL.md",
+            "config\workflows\00-architect-sre.md",
+            "config\rules\arabic_keyboard_shortcuts.md",
+            "GEMINI.md"
+          )) {
+            if (-not (Test-Path -LiteralPath (Join-Path $target $rel))) { throw "missing installed pack item: $rel" }
+          }
+          powershell -NoProfile -ExecutionPolicy Bypass -File scripts\install.ps1 -Uninstall -WithPack -TargetRoot $target
+          if ($LASTEXITCODE -ne 0) { throw "install.ps1 -Uninstall -WithPack exited with $LASTEXITCODE" }
+          foreach ($rel in @(
+            "config\skills\00-lock360-zero-gaps",
+            "config\skills\00-architect-sre",
+            "config\skills\neon",
+            "config\workflows\00-architect-sre.md",
+            "config\rules\arabic_keyboard_shortcuts.md"
+          )) {
+            if (Test-Path -LiteralPath (Join-Path $target $rel)) { throw "uninstalled pack item still present: $rel" }
+          }
+          $txt = [System.IO.File]::ReadAllText((Join-Path $target "GEMINI.md"))
+          if (($txt -match [regex]::Escape("<!-- LOCK360_START -->")) -or ($txt -match [regex]::Escape("<!-- LOCK360_END -->"))) {
+            throw "expected zero LOCK360 markers after pack uninstall"
+          }

@@ -1,4 +1,4 @@
-# 🟢 Antigravity — تثبيت Lock360 `v2.4` كـ Skill
+# 🟢 Antigravity — تثبيت Lock360 `v2.5` كـ Skill
 
 > Antigravity هو البيئة الأصلية للحزمة: `SKILL.md` في جذر المستودع هو المحوّل (`Adapter`) الذي يحدد متى يعمل كل ترس. الدليل الكامل في [`../../README.md`](../../README.md).
 
@@ -28,7 +28,7 @@ bash ~/CORE-PROMPT-360/scripts/install.sh --all
 
 ```markdown
 <!-- LOCK360_START -->
-## 🔒 بروتوكول التقفيل الشامل 360° (Lock360 v2.4)
+## 🔒 بروتوكول التقفيل الشامل 360° (Lock360 v2.5)
 
 - **المصدر الموحد:** `00-lock360-zero-gaps` (`~/.gemini/config/skills/00-lock360-zero-gaps/SKILL.md` · `gist/01-CORE-PROMPT-360-v2.md` · `workflows/00-lock360-zero-gaps.md`).
 - **`L1 Auto-Guard` (`P` تلقائياً بعد الأعمال غير التافهة):** راجع المتبقي/الحدود، أمان التسليم والتزامن، الدليل القاطع بعد آخر تعديل، واسأل المستخدم عن أي غموض بدل التخمين.
@@ -41,4 +41,4 @@ bash ~/CORE-PROMPT-360/scripts/install.sh --all
 - اكتب في الشات: `قفّل 360 على: [موضوع تجريبي]` ⬅ يجب أن يبدأ الرد من `3.1` بترس مُعلن.
 - بعد تعديل متعدد الملفات ⬅ يجب أن يظهر فحص `P` ذو البوابات الأربع تلقائياً.
 
-> رابط النواة المثبّت: `https://raw.githubusercontent.com/wewe00220033/CORE-PROMPT-360/v2.4/gist/01-CORE-PROMPT-360-v2.md`
+> رابط النواة المثبّت: `https://raw.githubusercontent.com/wewe00220033/CORE-PROMPT-360/v2.5/gist/01-CORE-PROMPT-360-v2.md`

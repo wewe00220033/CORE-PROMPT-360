@@ -1,6 +1,6 @@
-# 🔒 سير عمل التقفيل الشامل 360° بالضبة والمفتاح — `/lock360` (`v2.4`)
+# 🔒 سير عمل التقفيل الشامل 360° بالضبة والمفتاح — `/lock360` (`v2.5`)
 
-> **المرجع الرئيسي للمنهج:** مهارة **`00-lock360-zero-gaps`** ← [`gist/01-CORE-PROMPT-360-v2.md`](https://github.com/wewe00220033/CORE-PROMPT-360/blob/v2.4/gist/01-CORE-PROMPT-360-v2.md) · [`SKILL.md`](https://github.com/wewe00220033/CORE-PROMPT-360/blob/v2.4/SKILL.md).
+> **المرجع الرئيسي للمنهج:** مهارة **`00-lock360-zero-gaps`** ← [`gist/01-CORE-PROMPT-360-v2.md`](https://github.com/wewe00220033/CORE-PROMPT-360/blob/v2.5/gist/01-CORE-PROMPT-360-v2.md) · [`SKILL.md`](https://github.com/wewe00220033/CORE-PROMPT-360/blob/v2.5/SKILL.md).
 
 ---
 

@@ -4,6 +4,12 @@
 
 ---
 
+## 🧰 v2.5 (2026-11-24) — حزمة المهارات الشاملة (`skills-pack`) وترخيص `MIT`
+- **ترخيص المستودع:** إضافة [`LICENSE`](../LICENSE) (`MIT License`) وتضمينه في فحوصات النظافة والترميز.
+- **حزمة الترحيل الشاملة (`skills-pack/`):** ضم الـ `23` مهارة المكمّلة (لإجمالي `24` مهارة مع `00-lock360-zero-gaps`) + `workflows/` + `rules/` + قالب `GEMINI.template.md` منزوع التوكنات والمسارات الشخصية (`%USERPROFILE%` / `%LOCALAPPDATA%` / `<YOUR_TELEGRAM_*>`).
+- **دعم `-WithPack` / `--with-pack`:** ترقية `install.ps1` و`install.sh` و`.github/workflows/verify.yml` لدعم تثبيت الحزمة كاملة مع النسخ الاحتياطي وتنظيفها بأمان عند إلغاء التثبيت دون لمس ملفات المستخدم الأخرى.
+- **تحصين `verify_repo.py`:** تعميم فحص الأسرار والمسارات الحساسة والتوكنات على جميع الملفات بما فيها `skills-pack/` مع الإبقاء على عزل نواة Lock360.
+
 ## 📦 v2.4 (2026-11-24) — التوزيع العابر للمنصات والتحقق الآلي (`Antigravity × Fable`)
 - **سكربتات التثبيت الديناميكية:** `install.ps1` / `install.sh` يحسبان مسار المهارة من جذر الهدف (`--target` / `-TargetRoot`) مع `python3` ثم `python` كبديل تلقائي لتحديث كتلة `GEMINI.md`، ونسخ احتياطي قبل أي كتابة.
 - **أداة التحقق + CI:** `scripts/verify_repo.py` (stdlib فقط: BOM، LF، ASCII لـ `install.ps1`، أنماط محظورة، روابط نسبية، تطابق `VERSION`، placeholders، `bash -n`، صحة workflows، صفر جداول) + `.github/workflows/verify.yml` بتثبيت/إلغاء تثبيت كامل على Ubuntu وWindows.

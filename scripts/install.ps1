@@ -3,6 +3,7 @@ param(
     [switch]$All,
     [switch]$WithWorkflow,
     [switch]$WithRule,
+    [switch]$WithPack,
     [switch]$Uninstall,
     [string]$TargetRoot = (Join-Path $HOME ".gemini")
 )
@@ -76,7 +77,7 @@ function Get-SkillPathForSnippet {
 function Build-GeminiSnippet {
     # Literal lines are Unescape'd FIRST; the runtime skill path is concatenated AFTER (never passed through Unescape).
     $skillPath = Get-SkillPathForSnippet
-    $head = [regex]::Unescape("## \uD83D\uDD12 \u0628\u0631\u0648\u062A\u0648\u0643\u0648\u0644 \u0627\u0644\u062A\u0642\u0641\u064A\u0644 \u0627\u0644\u0634\u0627\u0645\u0644 360\u00B0 (Lock360 v2.4)")
+    $head = [regex]::Unescape("## \uD83D\uDD12 \u0628\u0631\u0648\u062A\u0648\u0643\u0648\u0644 \u0627\u0644\u062A\u0642\u0641\u064A\u0644 \u0627\u0644\u0634\u0627\u0645\u0644 360\u00B0 (Lock360 v2.5)")
     $srcA = [regex]::Unescape("- **\u0627\u0644\u0645\u0635\u062F\u0631 \u0627\u0644\u0645\u0648\u062D\u062F:** ``00-lock360-zero-gaps`` (``")
     $srcB = [regex]::Unescape("`` \u00B7 ``gist/01-CORE-PROMPT-360-v2.md`` \u00B7 ``workflows/00-lock360-zero-gaps.md``).")
     $tail = @(
@@ -141,6 +142,161 @@ function Assert-GeminiMarkersValid {
     }
 }
 
+$PackRoot = Join-Path $RepoRoot "skills-pack"
+
+function Copy-PackPayload {
+    if (-not (Test-Path -LiteralPath $PackRoot)) {
+        throw "skills-pack directory not found at: $PackRoot"
+    }
+    $skillsDstRoot = Join-Path (Join-Path $TargetRoot "config") "skills"
+    $rulesDstRoot = Join-Path (Join-Path $TargetRoot "config") "rules"
+    $bakRoot = Join-Path $TargetRoot (".backup_lock360_pack_" + (Get-Date -Format "yyyyMMdd_HHmmss"))
+    $bakCreated = $false
+    $ensureBak = {
+        param([string]$Sub)
+        $p = Join-Path $bakRoot $Sub
+        if (-not (Test-Path -LiteralPath $p)) {
+            New-Item -ItemType Directory -Path $p -Force | Out-Null
+        }
+        return $p
+    }
+
+    $packSkillsDir = Join-Path $PackRoot "skills"
+    $skillCount = 0
+    if (Test-Path -LiteralPath $packSkillsDir) {
+        if (-not (Test-Path -LiteralPath $skillsDstRoot)) {
+            New-Item -ItemType Directory -Path $skillsDstRoot -Force | Out-Null
+        }
+        foreach ($dir in Get-ChildItem -LiteralPath $packSkillsDir -Directory) {
+            $dst = Join-Path $skillsDstRoot $dir.Name
+            if (Test-Path -LiteralPath $dst) {
+                $bdir = & $ensureBak "skills"
+                $bakCreated = $true
+                Copy-Item -LiteralPath $dst -Destination (Join-Path $bdir $dir.Name) -Recurse -Force
+                Remove-Item -LiteralPath $dst -Recurse -Force
+            }
+            Copy-Item -LiteralPath $dir.FullName -Destination $dst -Recurse -Force
+            $skillCount++
+        }
+    }
+
+    $packWfDir = Join-Path $PackRoot "workflows"
+    $wfCount = 0
+    if (Test-Path -LiteralPath $packWfDir) {
+        if (-not (Test-Path -LiteralPath $WfDstDir)) {
+            New-Item -ItemType Directory -Path $WfDstDir -Force | Out-Null
+        }
+        foreach ($f in Get-ChildItem -LiteralPath $packWfDir -File) {
+            $dst = Join-Path $WfDstDir $f.Name
+            if (Test-Path -LiteralPath $dst) {
+                $bdir = & $ensureBak "workflows"
+                $bakCreated = $true
+                Copy-Item -LiteralPath $dst -Destination (Join-Path $bdir $f.Name) -Force
+            }
+            Copy-Item -LiteralPath $f.FullName -Destination $dst -Force
+            $wfCount++
+        }
+    }
+
+    $packRulesDir = Join-Path $PackRoot "rules"
+    $ruleCount = 0
+    if (Test-Path -LiteralPath $packRulesDir) {
+        if (-not (Test-Path -LiteralPath $rulesDstRoot)) {
+            New-Item -ItemType Directory -Path $rulesDstRoot -Force | Out-Null
+        }
+        foreach ($f in Get-ChildItem -LiteralPath $packRulesDir -File) {
+            $dst = Join-Path $rulesDstRoot $f.Name
+            if (Test-Path -LiteralPath $dst) {
+                $bdir = & $ensureBak "rules"
+                $bakCreated = $true
+                Copy-Item -LiteralPath $dst -Destination (Join-Path $bdir $f.Name) -Force
+            }
+            Copy-Item -LiteralPath $f.FullName -Destination $dst -Force
+            $ruleCount++
+        }
+    }
+
+    if ($bakCreated) {
+        Write-Host "[lock360] Backed up existing pack targets to: $bakRoot"
+    }
+    Write-Host "[lock360] Installed skills-pack: skills=$skillCount workflows=$wfCount rules=$ruleCount"
+
+    if ($All -or $WithRule) {
+        $tpl = Join-Path $PackRoot "GEMINI.template.md"
+        if (Test-Path -LiteralPath $tpl) {
+            if (-not (Test-Path -LiteralPath $GeminiFile)) {
+                $tplTxt = [System.IO.File]::ReadAllText($tpl, $Utf8NoBom)
+                Write-Utf8Atomic -Path $GeminiFile -Text $tplTxt
+                Write-Host "[lock360] Seeded new GEMINI.md from sanitized skills-pack/GEMINI.template.md"
+            } else {
+                Write-Host "[lock360] Existing GEMINI.md preserved (sanitized template available at skills-pack/GEMINI.template.md)"
+            }
+        }
+    }
+}
+
+function Remove-PackPayload {
+    if (-not (Test-Path -LiteralPath $PackRoot)) {
+        Write-Host "[lock360] Warning: skills-pack not found in repo; skipping pack uninstall."
+        return
+    }
+    $skillsDstRoot = Join-Path (Join-Path $TargetRoot "config") "skills"
+    $rulesDstRoot = Join-Path (Join-Path $TargetRoot "config") "rules"
+    $bakRoot = Join-Path $TargetRoot (".backup_lock360_pack_uninstall_" + (Get-Date -Format "yyyyMMdd_HHmmss"))
+    $bakCreated = $false
+    $ensureBak = {
+        param([string]$Sub)
+        $p = Join-Path $bakRoot $Sub
+        if (-not (Test-Path -LiteralPath $p)) {
+            New-Item -ItemType Directory -Path $p -Force | Out-Null
+        }
+        return $p
+    }
+
+    $packSkillsDir = Join-Path $PackRoot "skills"
+    if (Test-Path -LiteralPath $packSkillsDir) {
+        foreach ($dir in Get-ChildItem -LiteralPath $packSkillsDir -Directory) {
+            $dst = Join-Path $skillsDstRoot $dir.Name
+            if (Test-Path -LiteralPath $dst) {
+                $bdir = & $ensureBak "skills"
+                $bakCreated = $true
+                Copy-Item -LiteralPath $dst -Destination (Join-Path $bdir $dir.Name) -Recurse -Force
+                Remove-Item -LiteralPath $dst -Recurse -Force
+            }
+        }
+    }
+
+    $packWfDir = Join-Path $PackRoot "workflows"
+    if (Test-Path -LiteralPath $packWfDir) {
+        foreach ($f in Get-ChildItem -LiteralPath $packWfDir -File) {
+            $dst = Join-Path $WfDstDir $f.Name
+            if (Test-Path -LiteralPath $dst) {
+                $bdir = & $ensureBak "workflows"
+                $bakCreated = $true
+                Copy-Item -LiteralPath $dst -Destination (Join-Path $bdir $f.Name) -Force
+                Remove-Item -LiteralPath $dst -Force
+            }
+        }
+    }
+
+    $packRulesDir = Join-Path $PackRoot "rules"
+    if (Test-Path -LiteralPath $packRulesDir) {
+        foreach ($f in Get-ChildItem -LiteralPath $packRulesDir -File) {
+            $dst = Join-Path $rulesDstRoot $f.Name
+            if (Test-Path -LiteralPath $dst) {
+                $bdir = & $ensureBak "rules"
+                $bakCreated = $true
+                Copy-Item -LiteralPath $dst -Destination (Join-Path $bdir $f.Name) -Force
+                Remove-Item -LiteralPath $dst -Force
+            }
+        }
+    }
+
+    if ($bakCreated) {
+        Write-Host "[lock360] Backed up and removed skills-pack targets (backup: $bakRoot)"
+    }
+}
+
 if ($Uninstall) {
     Assert-GeminiMarkersValid
     if (Test-Path -LiteralPath $SkillDst) {
@@ -154,6 +310,9 @@ if ($Uninstall) {
     if (Test-Path -LiteralPath $WfDst) {
         Remove-Item -LiteralPath $WfDst -Force
         Write-Host "[lock360] Removed workflow: $WfDst"
+    }
+    if ($WithPack) {
+        Remove-PackPayload
     }
     Update-GeminiMarkerBlock -RemoveOnly $true
     Write-Host "[lock360] Uninstall complete."
@@ -175,6 +334,10 @@ if ($All -or $WithWorkflow) {
         Copy-Item -LiteralPath $wfSrc -Destination $WfDst -Force
         Write-Host "[lock360] Installed workflow to: $WfDst"
     }
+}
+
+if ($WithPack) {
+    Copy-PackPayload
 }
 
 if ($All -or $WithRule) {
