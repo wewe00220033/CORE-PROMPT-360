@@ -1,13 +1,13 @@
 ---
 name: 00-lock360-zero-gaps
 description: >-
-  بروتوكول التقفيل الشامل 360° بالضبة والمفتاح (v2.3) — المحوّل الموحّد لتشغيل المنهج الحاصر ومنع النقاط العمياء
+  بروتوكول التقفيل الشامل 360° بالضبة والمفتاح (v2.4) — المحوّل الموحّد لتشغيل المنهج الحاصر ومنع النقاط العمياء
   في المشاريع والأنظمة والقرارات. يُفعَّل تلقائياً في L1 بعد المهام غير التافهة، أو بالطلب الصريح:
   قفّل 360، 360/1600/10000 درجة، بالضبة والمفتاح، اقفل كل الثغرات، حرامي المتحف، قناع رامز،
   تبديل الشفتات وغفوة الحارس، من السور للداخل، منهج الحج والفدية، اسألني ولا تخمّن، /lock360.
 ---
 
-# 🔒 بروتوكول التقفيل الشامل 360° (`00-lock360-zero-gaps v2.3 — Adapter`)
+# 🔒 بروتوكول التقفيل الشامل 360° (`00-lock360-zero-gaps v2.4 — Adapter`)
 
 > **مصدر الحقيقة الواحد للمنهج والمراحل:** [`./gist/01-CORE-PROMPT-360-v2.md`](./gist/01-CORE-PROMPT-360-v2.md) (`14` مرحلة + بوابة الصدق `[✅/⚠️/❓]` + فيزياء الواقع + نوع الباب + `Kill Switch` + الأتراس `P / S / M / L`).
 > هذا الملف هو **المحوّل المحلي (`Adapter`)** الخاص ببيئة Antigravity: يحدد متى نعمل، بأي مستوى، وكيف نربط مهارات البيئة دون تكرار المنهج.
@@ -51,6 +51,6 @@ description: >-
 ---
 
 ## 📚 ملفات الحزمة وقاعدة العرض
-- **النواة المحمولة (Gist `v2.3`):** [`gist/00-README.md`](./gist/00-README.md) · [`gist/01-CORE-PROMPT-360-v2.md`](./gist/01-CORE-PROMPT-360-v2.md) · [`gist/02-LENSES.md`](./gist/02-LENSES.md) · [`gist/03-EXAMPLES.md`](./gist/03-EXAMPLES.md) · [`gist/04-CHANGELOG.md`](./gist/04-CHANGELOG.md).
+- **النواة المحمولة (Gist `v2.4`):** [`gist/00-README.md`](./gist/00-README.md) · [`gist/01-CORE-PROMPT-360-v2.md`](./gist/01-CORE-PROMPT-360-v2.md) · [`gist/02-LENSES.md`](./gist/02-LENSES.md) · [`gist/03-EXAMPLES.md`](./gist/03-EXAMPLES.md) · [`gist/04-CHANGELOG.md`](./gist/04-CHANGELOG.md).
 - **مراجع البيئة المحلية:** [`references/DOMAIN_MATRICES.md`](./references/DOMAIN_MATRICES.md) · [`references/ADVERSARIAL_CHECKLIST_360.md`](./references/ADVERSARIAL_CHECKLIST_360.md) · [`references/LOCK360_TEMPLATES.md`](./references/LOCK360_TEMPLATES.md).
 - **ضابط العرض (`RTL-Safe`):** ممنوع وضع جداول ماركداون (`| col |`) في الشات نهائياً (استخدم قوائم نقطية وكروت رأسية)، ومع التعديلات البرمجية الفعلية التزم بالتسجيل في الذاكرة وكتلة `🔍 نقد ذاتي:`.

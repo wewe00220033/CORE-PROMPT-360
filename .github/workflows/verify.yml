@@ -1,0 +1,93 @@
+name: verify
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Repo hygiene checks
+        run: python3 scripts/verify_repo.py
+
+      - name: Bash syntax check
+        run: bash -n scripts/install.sh
+
+      - name: Install round-trip (bash)
+        run: |
+          set -euo pipefail
+          TARGET="$RUNNER_TEMP/lock360"
+          bash scripts/install.sh --all --target "$TARGET"
+          test -f "$TARGET/config/skills/00-lock360-zero-gaps/SKILL.md"
+          test -f "$TARGET/config/workflows/00-lock360-zero-gaps.md"
+          python3 - "$TARGET/GEMINI.md" <<'PY'
+          import sys
+          txt = open(sys.argv[1], encoding="utf-8").read()
+          s = txt.count("<!-- LOCK360_START -->")
+          e = txt.count("<!-- LOCK360_END -->")
+          print("markers after install: start=%d end=%d" % (s, e))
+          sys.exit(0 if (s, e) == (1, 1) else 1)
+          PY
+
+      - name: Uninstall round-trip (bash)
+        run: |
+          set -euo pipefail
+          TARGET="$RUNNER_TEMP/lock360"
+          bash scripts/install.sh --uninstall --target "$TARGET"
+          test ! -d "$TARGET/config/skills/00-lock360-zero-gaps"
+          test ! -f "$TARGET/config/workflows/00-lock360-zero-gaps.md"
+          python3 - "$TARGET/GEMINI.md" <<'PY'
+          import os, sys
+          p = sys.argv[1]
+          txt = open(p, encoding="utf-8").read() if os.path.isfile(p) else ""
+          s = txt.count("<!-- LOCK360_START -->")
+          e = txt.count("<!-- LOCK360_END -->")
+          print("markers after uninstall: start=%d end=%d" % (s, e))
+          sys.exit(0 if (s, e) == (0, 0) else 1)
+          PY
+
+  windows:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: powershell
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install round-trip (Windows PowerShell 5.1)
+        run: |
+          $ErrorActionPreference = "Stop"
+          $target = Join-Path $env:RUNNER_TEMP "lock360"
+          powershell -NoProfile -ExecutionPolicy Bypass -File scripts\install.ps1 -All -TargetRoot $target
+          if ($LASTEXITCODE -ne 0) { throw "install.ps1 exited with $LASTEXITCODE" }
+          $skill = Join-Path $target "config\skills\00-lock360-zero-gaps"
+          if (-not (Test-Path -LiteralPath (Join-Path $skill "SKILL.md"))) { throw "skill folder missing: $skill" }
+          if (-not (Test-Path -LiteralPath (Join-Path $target "config\workflows\00-lock360-zero-gaps.md"))) { throw "workflow file missing" }
+          $txt = [System.IO.File]::ReadAllText((Join-Path $target "GEMINI.md"))
+          $s = ([regex]::Matches($txt, [regex]::Escape("<!-- LOCK360_START -->"))).Count
+          $e = ([regex]::Matches($txt, [regex]::Escape("<!-- LOCK360_END -->"))).Count
+          Write-Host "markers after install: start=$s end=$e"
+          if (($s -ne 1) -or ($e -ne 1)) { throw "expected exactly one LOCK360 marker pair" }
+
+      - name: Uninstall round-trip (Windows PowerShell 5.1)
+        run: |
+          $ErrorActionPreference = "Stop"
+          $target = Join-Path $env:RUNNER_TEMP "lock360"
+          powershell -NoProfile -ExecutionPolicy Bypass -File scripts\install.ps1 -Uninstall -TargetRoot $target
+          if ($LASTEXITCODE -ne 0) { throw "install.ps1 -Uninstall exited with $LASTEXITCODE" }
+          if (Test-Path -LiteralPath (Join-Path $target "config\skills\00-lock360-zero-gaps")) { throw "skill folder still present" }
+          if (Test-Path -LiteralPath (Join-Path $target "config\workflows\00-lock360-zero-gaps.md")) { throw "workflow file still present" }
+          $gem = Join-Path $target "GEMINI.md"
+          $txt = ""
+          if (Test-Path -LiteralPath $gem) { $txt = [System.IO.File]::ReadAllText($gem) }
+          $s = ([regex]::Matches($txt, [regex]::Escape("<!-- LOCK360_START -->"))).Count
+          $e = ([regex]::Matches($txt, [regex]::Escape("<!-- LOCK360_END -->"))).Count
+          Write-Host "markers after uninstall: start=$s end=$e"
+          if (($s -ne 0) -or ($e -ne 0)) { throw "expected zero LOCK360 markers after uninstall" }

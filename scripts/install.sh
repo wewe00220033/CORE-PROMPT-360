@@ -36,21 +36,46 @@ SKILL_DST="${TARGET_ROOT}/config/skills/${SKILL_NAME}"
 WF_DST="${TARGET_ROOT}/config/workflows/00-lock360-zero-gaps.md"
 GEMINI_FILE="${TARGET_ROOT}/GEMINI.md"
 
+# Portable form when TargetRoot is the default (~/.gemini); absolute SKILL.md path otherwise.
+DEFAULT_ROOT="${HOME%/}/.gemini"
+if [ "${TARGET_ROOT%/}" = "$DEFAULT_ROOT" ]; then
+  SNIPPET_SKILL_PATH="~/.gemini/config/skills/${SKILL_NAME}/SKILL.md"
+else
+  SNIPPET_SKILL_PATH="${SKILL_DST}/SKILL.md"
+fi
+
+# Python is required only for --with-rule/--all/--uninstall; resolved BEFORE any copy (no half-install).
+PY=""
+require_python() {
+  # Try python3 then python; keep the first one that actually runs (skips broken launchers / store stubs).
+  local cand
+  for cand in python3 python; do
+    if command -v "$cand" >/dev/null 2>&1 \
+       && "$cand" -c 'import sys; sys.exit(0 if sys.version_info >= (3, 6) else 1)' >/dev/null 2>&1; then
+      PY="$(command -v "$cand")"
+      return 0
+    fi
+  done
+  echo "error: a working Python >= 3.6 (python3 or python) is required for --with-rule/--all/--uninstall" >&2
+  exit 2
+}
+
 update_gemini_block() {
   local mode="$1" # install | remove
-  python3 - "$GEMINI_FILE" "$mode" <<'PY'
+  "$PY" - "$GEMINI_FILE" "$mode" "$SNIPPET_SKILL_PATH" <<'PY'
 import os, re, shutil, sys
 
-path, mode = sys.argv[1], sys.argv[2]
+path, mode, skill_path = sys.argv[1], sys.argv[2], sys.argv[3]
 start = "<!-- LOCK360_START -->"
 end = "<!-- LOCK360_END -->"
 snippet = """<!-- LOCK360_START -->
-## 🔒 بروتوكول التقفيل الشامل 360° (Lock360 v2.3)
+## 🔒 بروتوكول التقفيل الشامل 360° (Lock360 v2.4)
 
-- **المصدر الموحد:** `00-lock360-zero-gaps` (`~/.gemini/config/skills/00-lock360-zero-gaps/SKILL.md` · `gist/01-CORE-PROMPT-360-v2.md` · `workflows/00-lock360-zero-gaps.md`).
+- **المصدر الموحد:** `00-lock360-zero-gaps` (`__LOCK360_SKILL_PATH__` · `gist/01-CORE-PROMPT-360-v2.md` · `workflows/00-lock360-zero-gaps.md`).
 - **`L1 Auto-Guard` (`P` تلقائياً بعد الأعمال غير التافهة):** راجع المتبقي/الحدود، أمان التسليم والتزامن، الدليل القاطع بعد آخر تعديل، واسأل المستخدم عن أي غموض بدل التخمين.
 - **`L2 / L3`:** عند طلب قفّل 360 / بالضبة والمفتاح / 1600°-10000° / `/lock360` حمّل المهارة ونفّذ الترس المناسب (`S / M / L`)، مع الالتزام بقاعدة `RTL-Safe` (بلا جداول `| col |` في الشات).
 <!-- LOCK360_END -->"""
+snippet = snippet.replace("__LOCK360_SKILL_PATH__", skill_path)
 
 existing = ""
 if os.path.isfile(path):
@@ -88,9 +113,9 @@ PY
 }
 
 validate_gemini_markers() {
-  command -v python3 >/dev/null 2>&1 || { echo "error: python3 required for --with-rule/--all/--uninstall" >&2; exit 2; }
+  require_python
   [ -f "$GEMINI_FILE" ] || return 0
-  python3 - "$GEMINI_FILE" <<'PY'
+  "$PY" - "$GEMINI_FILE" <<'PY'
 import re, sys
 p = sys.argv[1]
 txt = open(p, "r", encoding="utf-8").read().replace("\r\n", "\n")

@@ -6,3 +6,5 @@ Thumbs.db
 _backup_*/
 .backup_*/
 scratch/
+__pycache__/
+*.pyc

@@ -19,6 +19,8 @@ $StartMarker = "<!-- LOCK360_START -->"
 $EndMarker = "<!-- LOCK360_END -->"
 $Utf8NoBom = New-Object System.Text.UTF8Encoding($false)
 
+Write-Host "[lock360] TargetRoot: $TargetRoot"
+
 function Write-Utf8Atomic([string]$Path, [string]$Text) {
     $parent = Split-Path -Parent $Path
     if (-not (Test-Path -LiteralPath $parent)) {
@@ -62,17 +64,35 @@ function Copy-SkillPayload([string]$Src, [string]$Dst) {
     Write-Host "[lock360] Installed skill to: $Dst"
 }
 
+function Get-SkillPathForSnippet {
+    $defaultRoot = (Join-Path $HOME ".gemini").TrimEnd('\', '/')
+    $root = ([string]$TargetRoot).TrimEnd('\', '/')
+    if ([string]::Equals($root, $defaultRoot, [System.StringComparison]::OrdinalIgnoreCase)) {
+        return ("~/.gemini/config/skills/" + $SkillName + "/SKILL.md")
+    }
+    return (Join-Path $SkillDst "SKILL.md")
+}
+
 function Build-GeminiSnippet {
-    $raw = @(
-        $StartMarker
-        "## \uD83D\uDD12 \u0628\u0631\u0648\u062A\u0648\u0643\u0648\u0644 \u0627\u0644\u062A\u0642\u0641\u064A\u0644 \u0627\u0644\u0634\u0627\u0645\u0644 360\u00B0 (Lock360 v2.3)"
-        ""
-        "- **\u0627\u0644\u0645\u0635\u062F\u0631 \u0627\u0644\u0645\u0648\u062D\u062F:** ``00-lock360-zero-gaps`` (``~/.gemini/config/skills/00-lock360-zero-gaps/SKILL.md`` \u00B7 ``gist/01-CORE-PROMPT-360-v2.md`` \u00B7 ``workflows/00-lock360-zero-gaps.md``)."
+    # Literal lines are Unescape'd FIRST; the runtime skill path is concatenated AFTER (never passed through Unescape).
+    $skillPath = Get-SkillPathForSnippet
+    $head = [regex]::Unescape("## \uD83D\uDD12 \u0628\u0631\u0648\u062A\u0648\u0643\u0648\u0644 \u0627\u0644\u062A\u0642\u0641\u064A\u0644 \u0627\u0644\u0634\u0627\u0645\u0644 360\u00B0 (Lock360 v2.4)")
+    $srcA = [regex]::Unescape("- **\u0627\u0644\u0645\u0635\u062F\u0631 \u0627\u0644\u0645\u0648\u062D\u062F:** ``00-lock360-zero-gaps`` (``")
+    $srcB = [regex]::Unescape("`` \u00B7 ``gist/01-CORE-PROMPT-360-v2.md`` \u00B7 ``workflows/00-lock360-zero-gaps.md``).")
+    $tail = @(
         "- **``L1 Auto-Guard`` (``P`` \u062A\u0644\u0642\u0627\u0626\u064A\u0627\u064B \u0628\u0639\u062F \u0627\u0644\u0623\u0639\u0645\u0627\u0644 \u063A\u064A\u0631 \u0627\u0644\u062A\u0627\u0641\u0647\u0629):** \u0631\u0627\u062C\u0639 \u0627\u0644\u0645\u062A\u0628\u0642\u064A/\u0627\u0644\u062D\u062F\u0648\u062F\u060C \u0623\u0645\u0627\u0646 \u0627\u0644\u062A\u0633\u0644\u064A\u0645 \u0648\u0627\u0644\u062A\u0632\u0627\u0645\u0646\u060C \u0627\u0644\u062F\u0644\u064A\u0644 \u0627\u0644\u0642\u0627\u0637\u0639 \u0628\u0639\u062F \u0622\u062E\u0631 \u062A\u0639\u062F\u064A\u0644\u060C \u0648\u0627\u0633\u0623\u0644 \u0627\u0644\u0645\u0633\u062A\u062E\u062F\u0645 \u0639\u0646 \u0623\u064A \u063A\u0645\u0648\u0636 \u0628\u062F\u0644 \u0627\u0644\u062A\u062E\u0645\u064A\u0646."
         "- **``L2 / L3``:** \u0639\u0646\u062F \u0637\u0644\u0628 \u0642\u0641\u0651\u0644 360 / \u0628\u0627\u0644\u0636\u0628\u0629 \u0648\u0627\u0644\u0645\u0641\u062A\u0627\u062D / 1600\u00B0-10000\u00B0 / ``/lock360`` \u062D\u0645\u0651\u0644 \u0627\u0644\u0645\u0647\u0627\u0631\u0629 \u0648\u0646\u0641\u0651\u0630 \u0627\u0644\u062A\u0631\u0633 \u0627\u0644\u0645\u0646\u0627\u0633\u0628 (``S / M / L``)\u060C \u0645\u0639 \u0627\u0644\u0627\u0644\u062A\u0632\u0627\u0645 \u0628\u0642\u0627\u0639\u062F\u0629 ``RTL-Safe`` (\u0628\u0644\u0627 \u062C\u062F\u0627\u0648\u0644 ``| col |`` \u0641\u064A \u0627\u0644\u0634\u0627\u062A)."
-        $EndMarker
     ) -join "`n"
-    return [regex]::Unescape($raw)
+    $tailText = [regex]::Unescape($tail)
+    $lines = @(
+        $StartMarker
+        $head
+        ""
+        ($srcA + $skillPath + $srcB)
+        $tailText
+        $EndMarker
+    )
+    return ($lines -join "`n")
 }
 
 function Update-GeminiMarkerBlock([bool]$RemoveOnly) {

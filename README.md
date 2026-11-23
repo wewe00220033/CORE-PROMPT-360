@@ -1,8 +1,8 @@
 <div dir="rtl">
 
-# 🔒 CORE-PROMPT-360 — بروتوكول التقفيل الشامل 360° بالضبة والمفتاح (`v2.3`)
+# 🔒 CORE-PROMPT-360 — بروتوكول التقفيل الشامل 360° بالضبة والمفتاح (`v2.4`)
 
-> **مستودع جاهز كـ Skill محمولة + نواة برومبت عالمية** لنقل منهجية `Lock360 v2.3` إلى **أي جهاز** (Windows / macOS / Linux) وأي أداة ذكاء اصطناعي (Antigravity / OpenCode / Claude / Gemini / ChatGPT / DeepSeek).
+> **مستودع جاهز كـ Skill محمولة + نواة برومبت عالمية** لنقل منهجية `Lock360 v2.4` إلى **أي جهاز** (Windows / macOS / Linux) وأي أداة ذكاء اصطناعي (Antigravity / OpenCode / Claude / Gemini / ChatGPT / DeepSeek).
 > *(ملاحظة: هذا الدليل خاص بالتثبيت والنشر على الأجهزة عبر Git؛ لاستخدام البرومبت بالنسخ اليدوي المباشر اقرأ [`gist/00-README.md`](./gist/00-README.md)).*
 
 ---
@@ -13,7 +13,10 @@
 - **`gist/`:** النواة المحمولة المكتفية بذاتها ([`01-CORE-PROMPT-360-v2.md`](./gist/01-CORE-PROMPT-360-v2.md)) بـ `14` مرحلة + بوابة الصدق المضادة للمجاملة `[✅/⚠️/❓]` + `Explicit Non-Goals` + فيزياء الواقع والميكانيكا + نوع الباب + `Kill Switch / Pre-Mortem` + `8` أسئلة تصيّد سريعة + [`02-LENSES.md`](./gist/02-LENSES.md) (7 عدسات تخصصية) + [`03-EXAMPLES.md`](./gist/03-EXAMPLES.md) + [`04-CHANGELOG.md`](./gist/04-CHANGELOG.md).
 - **`references/`:** مراجع `L3` التقنية ([`DOMAIN_MATRICES.md`](./references/DOMAIN_MATRICES.md)، [`ADVERSARIAL_CHECKLIST_360.md`](./references/ADVERSARIAL_CHECKLIST_360.md)، [`LOCK360_TEMPLATES.md`](./references/LOCK360_TEMPLATES.md)).
 - **`workflows/00-lock360-zero-gaps.md`:** سير عمل `/lock360`.
-- **`scripts/`:** مثبّت آمن لـ Windows ([`install.ps1`](./scripts/install.ps1)) وmacOS/Linux ([`install.sh`](./scripts/install.sh)) مع النسخ الاحتياطي وإلغاء التثبيت.
+- **`scripts/`:** مثبّت آمن لـ Windows ([`install.ps1`](./scripts/install.ps1)) وmacOS/Linux ([`install.sh`](./scripts/install.sh)) مع النسخ الاحتياطي وإلغاء التثبيت + أداة الفحص [`verify_repo.py`](./scripts/verify_repo.py).
+- **`prompts/`:** كتل نسخ جاهزة لكل ترس + `/patch-360` ([`QUICK-START.md`](./prompts/QUICK-START.md)).
+- **`platforms/`:** تعليمات التثبيت على OpenCode / Claude Code / Cursor / ChatGPT ([`platforms/README.md`](./platforms/README.md)).
+- **`archive/`:** النص الأصلي `v1.x` للرجوع التاريخي فقط ([`archive/README.md`](./archive/README.md)).
 
 ---
 
@@ -81,14 +84,43 @@ git clone https://github.com/wewe00220033/CORE-PROMPT-360.git .agents/skills/00-
 
 ### 4️⃣ الاستخدام المباشر في ChatGPT / Claude / DeepSeek / Gemini Web
 
-انسخ محتوى [`gist/01-CORE-PROMPT-360-v2.md`](./gist/01-CORE-PROMPT-360-v2.md) أو وجّه أي ذكاء اصطناعي لرابط `raw` المثبّت على الإصدار `v2.3`:
+انسخ محتوى [`gist/01-CORE-PROMPT-360-v2.md`](./gist/01-CORE-PROMPT-360-v2.md) أو وجّه أي ذكاء اصطناعي لرابط `raw` المثبّت على الإصدار `v2.4`:
 
 </div>
 
-- **Core Prompt (`v2.3`):** `https://raw.githubusercontent.com/wewe00220033/CORE-PROMPT-360/v2.3/gist/01-CORE-PROMPT-360-v2.md`
-- **Plugin Lenses:** `https://raw.githubusercontent.com/wewe00220033/CORE-PROMPT-360/v2.3/gist/02-LENSES.md`
-- **Examples (`P/S/M/L`):** `https://raw.githubusercontent.com/wewe00220033/CORE-PROMPT-360/v2.3/gist/03-EXAMPLES.md`
-- **Prompt Guide:** `https://raw.githubusercontent.com/wewe00220033/CORE-PROMPT-360/v2.3/gist/00-README.md`
+- **Core Prompt (`v2.4`):** `https://raw.githubusercontent.com/wewe00220033/CORE-PROMPT-360/v2.4/gist/01-CORE-PROMPT-360-v2.md`
+- **Plugin Lenses:** `https://raw.githubusercontent.com/wewe00220033/CORE-PROMPT-360/v2.4/gist/02-LENSES.md`
+- **Examples (`P/S/M/L`):** `https://raw.githubusercontent.com/wewe00220033/CORE-PROMPT-360/v2.4/gist/03-EXAMPLES.md`
+- **Prompt Guide:** `https://raw.githubusercontent.com/wewe00220033/CORE-PROMPT-360/v2.4/gist/00-README.md`
+- **كتل نسخ جاهزة (`P/S/M/L` + `/patch-360`):** [`prompts/QUICK-START.md`](./prompts/QUICK-START.md)
+
+<div dir="rtl">
+
+---
+
+### 5️⃣ التثبيت على المنصات الأخرى (OpenCode / Claude Code / Cursor / ChatGPT)
+
+نفس القاعدة ذات الأسطر الأربعة معبّأة بصيغة كل أداة (`AGENTS.md` · `CLAUDE.md` · `.cursor/rules/*.mdc` · Custom Instructions) في [`platforms/README.md`](./platforms/README.md). والنص الأصلي `v1.x` محفوظ للرجوع التاريخي في [`archive/README.md`](./archive/README.md).
+
+---
+
+### 6️⃣ التحقق والتكامل المستمر (`Verify / CI`)
+
+![verify](https://github.com/wewe00220033/CORE-PROMPT-360/actions/workflows/verify.yml/badge.svg)
+
+أداة فحص بـ Python القياسية فقط ([`scripts/verify_repo.py`](./scripts/verify_repo.py)) تتأكد من: لا BOM، نهايات أسطر LF، `install.ps1` بـ ASCII، صفر أسرار أو مسارات أجهزة، سلامة الروابط النسبية، تطابق الإصدار مع `VERSION`، صفر جداول Markdown، وصحة `install.sh` و`.github/workflows/*.yml`. نفس الفحص + تثبيت/إلغاء تثبيت كامل على Ubuntu وWindows يعمل تلقائياً في [`.github/workflows/verify.yml`](./.github/workflows/verify.yml).
+
+</div>
+
+**macOS / Linux:**
+```bash
+python3 scripts/verify_repo.py
+```
+
+**Windows (PowerShell):**
+```powershell
+python scripts\verify_repo.py
+```
 
 <div dir="rtl">
 
