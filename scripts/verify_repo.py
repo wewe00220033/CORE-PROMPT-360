@@ -18,7 +18,7 @@ SELF_REL = "scripts/verify_repo.py"
 
 TEXT_EXTS = {".md", ".sh", ".py", ".yml", ".yaml", ".snippet", ".mdc",
              ".gitattributes", ".gitignore"}
-TEXT_NAMES = {"VERSION", ".gitattributes", ".gitignore"}
+TEXT_NAMES = {"VERSION", "LICENSE", ".gitattributes", ".gitignore"}
 
 RESULTS = []  # (status, check, message)
 
