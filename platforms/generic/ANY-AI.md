@@ -1,12 +1,12 @@
-# 🌐 Lock360 `v2.8` على أي AI أو واجهة دردشة (`Generic`)
+# 🌐 Lock360 `v2.9` على أي AI أو واجهة دردشة (`Generic`)
 
 > استخدم هذا المسار عندما لا توجد منصة مخصصة: Gemini Web / DeepSeek / Kimi / Mistral / Qwen / أي واجهة شات. معظم هذه الواجهات بلا أدوات، وكثير منها موديلات أضعف ⬅ المسار الافتراضي هو **[`../../prompts/WEAK-MODEL-BOOSTER.md`](../../prompts/WEAK-MODEL-BOOSTER.md)** (تمريرتان + إصلاح محدود).
 
 ## الطريقة السريعة (موديل قوي يقرأ الروابط)
 
 ```text
-اقرأ النواة من: https://raw.githubusercontent.com/wewe00220033/CORE-PROMPT-360/v2.8/gist/01-CORE-PROMPT-360-v2.md
-طبّق Lock360 v2.8 بالضبة والمفتاح.
+اقرأ النواة من: https://raw.githubusercontent.com/wewe00220033/CORE-PROMPT-360/v2.9/gist/01-CORE-PROMPT-360-v2.md
+طبّق Lock360 v2.9 بالضبة والمفتاح.
 الترس: [اكتشف تلقائياً / P / S / M / L]
 أسلوب العرض: [تلقائي / بشري يومي / هندسي تقني]
 الموضوع: [...]

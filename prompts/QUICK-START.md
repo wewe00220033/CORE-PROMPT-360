@@ -1,17 +1,17 @@
-# ⚡ QUICK-START — كتل نسخ جاهزة لـ Lock360 `v2.8`
+# ⚡ QUICK-START — كتل نسخ جاهزة لـ Lock360 `v2.9`
 
 > **الغرض:** صفحة واحدة تنسخ منها الكتلة المناسبة وتلصقها في أي شات (ChatGPT / Claude / Gemini / DeepSeek / Antigravity) بدون قراءة الدليل الكامل.
-> **القاعدة:** كل الروابط هنا `raw` ومثبّتة على الوسم `v2.8` عشان النتيجة تبقى ثابتة مهما اتطور المستودع لاحقاً. للتفاصيل الكاملة ارجع إلى [`../gist/00-README.md`](../gist/00-README.md) والنواة [`../gist/01-CORE-PROMPT-360-v2.md`](../gist/01-CORE-PROMPT-360-v2.md).
+> **القاعدة:** كل الروابط هنا `raw` ومثبّتة على الوسم `v2.9` عشان النتيجة تبقى ثابتة مهما اتطور المستودع لاحقاً. للتفاصيل الكاملة ارجع إلى [`../gist/00-README.md`](../gist/00-README.md) والنواة [`../gist/01-CORE-PROMPT-360-v2.md`](../gist/01-CORE-PROMPT-360-v2.md).
 
 ---
 
-## 🔗 الروابط المثبّتة (`v2.8`)
+## 🔗 الروابط المثبّتة (`v2.9`)
 
-- **النواة الكاملة:** `https://raw.githubusercontent.com/wewe00220033/CORE-PROMPT-360/v2.8/gist/01-CORE-PROMPT-360-v2.md`
-- **العدسات:** `https://raw.githubusercontent.com/wewe00220033/CORE-PROMPT-360/v2.8/gist/02-LENSES.md`
-- **الأمثلة (`P/S/M/L` + `/patch-360`):** `https://raw.githubusercontent.com/wewe00220033/CORE-PROMPT-360/v2.8/gist/03-EXAMPLES.md`
-- **دليل البرومبت:** `https://raw.githubusercontent.com/wewe00220033/CORE-PROMPT-360/v2.8/gist/00-README.md`
-- **هذه الصفحة:** `https://raw.githubusercontent.com/wewe00220033/CORE-PROMPT-360/v2.8/prompts/QUICK-START.md`
+- **النواة الكاملة:** `https://raw.githubusercontent.com/wewe00220033/CORE-PROMPT-360/v2.9/gist/01-CORE-PROMPT-360-v2.md`
+- **العدسات:** `https://raw.githubusercontent.com/wewe00220033/CORE-PROMPT-360/v2.9/gist/02-LENSES.md`
+- **الأمثلة (`P/S/M/L` + `/patch-360`):** `https://raw.githubusercontent.com/wewe00220033/CORE-PROMPT-360/v2.9/gist/03-EXAMPLES.md`
+- **دليل البرومبت:** `https://raw.githubusercontent.com/wewe00220033/CORE-PROMPT-360/v2.9/gist/00-README.md`
+- **هذه الصفحة:** `https://raw.githubusercontent.com/wewe00220033/CORE-PROMPT-360/v2.9/prompts/QUICK-START.md`
 
 > لو الـ AI ما بيقراش روابط: افتح رابط النواة في المتصفح، انسخ النص كله، والصقه بدل سطر "اقرأ النواة من" في أي كتلة تحت.
 
@@ -20,8 +20,8 @@
 ## 🔍 الترس `P` — مراجعة ما بعد المهمة (4 بوابات)
 
 ```text
-اقرأ النواة من: https://raw.githubusercontent.com/wewe00220033/CORE-PROMPT-360/v2.8/gist/01-CORE-PROMPT-360-v2.md
-طبّق الترس P (Post-Task 4-Gate) من Lock360 v2.8 على المهمة/التعديل السابق في هذا الشات:
+اقرأ النواة من: https://raw.githubusercontent.com/wewe00220033/CORE-PROMPT-360/v2.9/gist/01-CORE-PROMPT-360-v2.md
+طبّق الترس P (Post-Task 4-Gate) من Lock360 v2.9 على المهمة/التعديل السابق في هذا الشات:
 (1) المتبقي والثغرات · (2) أمان التسليم والتزامن · (3) الدليل القاطع بعد آخر تعديل · (4) أسئلة استيضاحية لازمة؟
 لا تجامل ولا تخمّن؛ علّم كل نقطة بـ [مؤكد] أو [مستنتج] أو [مجهول].
 ```
@@ -31,8 +31,8 @@
 ## ⚡ الترس `S` — قرار يومي سريع (صفحة واحدة)
 
 ```text
-اقرأ النواة من: https://raw.githubusercontent.com/wewe00220033/CORE-PROMPT-360/v2.8/gist/01-CORE-PROMPT-360-v2.md
-طبّق بروتوكول التقفيل 360° v2.8 بالترس S (سريع، أقل من 450 كلمة تقريباً) على:
+اقرأ النواة من: https://raw.githubusercontent.com/wewe00220033/CORE-PROMPT-360/v2.9/gist/01-CORE-PROMPT-360-v2.md
+طبّق بروتوكول التقفيل 360° v2.9 بالترس S (سريع، أقل من 450 كلمة تقريباً) على:
 الموضوع: [اكتب الموضوع]
 الهدف: [النتيجة المطلوبة]
 الميزانية الفيزيائية (وقت/فلوس/طاقة): [...]
@@ -45,8 +45,8 @@
 ## 🔧 الترس `M` — مشروع أو خطة متوسطة
 
 ```text
-اقرأ النواة من: https://raw.githubusercontent.com/wewe00220033/CORE-PROMPT-360/v2.8/gist/01-CORE-PROMPT-360-v2.md
-طبّق بروتوكول التقفيل 360° v2.8 بالترس M (كامل الأركان والفيزياء والانتقالات) على:
+اقرأ النواة من: https://raw.githubusercontent.com/wewe00220033/CORE-PROMPT-360/v2.9/gist/01-CORE-PROMPT-360-v2.md
+طبّق بروتوكول التقفيل 360° v2.9 بالترس M (كامل الأركان والفيزياء والانتقالات) على:
 الموضوع: [اكتب الموضوع]
 الموجود حالياً وممنوع يتكسر (Blast Radius): [...]
 الهدف: [...]
@@ -63,9 +63,9 @@
 ## 🏰 الترس `L` — قرار مصيري أو نظام حرج (التقفيل الكامل)
 
 ```text
-اقرأ النواة من: https://raw.githubusercontent.com/wewe00220033/CORE-PROMPT-360/v2.8/gist/01-CORE-PROMPT-360-v2.md
-واقرأ العدسات من: https://raw.githubusercontent.com/wewe00220033/CORE-PROMPT-360/v2.8/gist/02-LENSES.md
-طبّق بروتوكول التقفيل 360° v2.8 بالترس L (الـ 14 مرحلة كاملة + العدسات + كروت FMEA الرأسية + بوابة GO/HOLD + DoD) على:
+اقرأ النواة من: https://raw.githubusercontent.com/wewe00220033/CORE-PROMPT-360/v2.9/gist/01-CORE-PROMPT-360-v2.md
+واقرأ العدسات من: https://raw.githubusercontent.com/wewe00220033/CORE-PROMPT-360/v2.9/gist/02-LENSES.md
+طبّق بروتوكول التقفيل 360° v2.9 بالترس L (الـ 14 مرحلة كاملة + العدسات + كروت FMEA الرأسية + بوابة GO/HOLD + DoD) على:
 الموضوع: [اكتب الموضوع]
 الهدف: [...]
 الحدود / Explicit Non-Goals: [...]
@@ -81,7 +81,7 @@
 
 ## 📦 نسخة النواة الكاملة (بدون روابط — للـ AI اللي ما بيقراش روابط)
 
-1. افتح `https://raw.githubusercontent.com/wewe00220033/CORE-PROMPT-360/v2.8/gist/01-CORE-PROMPT-360-v2.md` في المتصفح.
+1. افتح `https://raw.githubusercontent.com/wewe00220033/CORE-PROMPT-360/v2.9/gist/01-CORE-PROMPT-360-v2.md` في المتصفح.
 2. انسخ النص كاملاً والصقه في أول رسالة بالشات.
 3. املأ قسم `[1] المدخلات` داخل النص (الخانات الفاضية الـ AI هيسألك عليها ومش هيخمن).
 4. لو الموضوع تخصصي، الصق العدسة المناسبة من `02-LENSES.md` في قسم `[5]`.

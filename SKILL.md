@@ -2,7 +2,7 @@
 name: 00-lock360-zero-gaps
 license: MIT
 description: >-
-  بروتوكول التقفيل الشامل 360° بالضبة والمفتاح (v2.8) — المحوّل الموحّد لتشغيل المنهج الحاصر ومنع النقاط العمياء
+  بروتوكول التقفيل الشامل 360° بالضبة والمفتاح (v2.9) — المحوّل الموحّد لتشغيل المنهج الحاصر ومنع النقاط العمياء
   في المشاريع والأنظمة والقرارات، مع طبقة النملة والدبانة (فحص هيكلي حتمي + كشف الانحراف) ومفتاح لهجة بشري/هندسي.
   يُفعَّل تلقائياً في L1 بعد المهام غير التافهة، أو بالطلب الصريح:
   قفّل 360، 360/1600/10000 درجة، بالضبة والمفتاح، اقفل كل الثغرات، مفيش أي ثغرة، جميع التريكات،
@@ -11,7 +11,7 @@ description: >-
   منهج الحج والفدية، اسألني ولا تخمّن، zero gaps، /lock360، وأمر الترقية الذاتية /patch-360.
 ---
 
-# 🔒 بروتوكول التقفيل الشامل 360° (`00-lock360-zero-gaps v2.8 — Adapter`)
+# 🔒 بروتوكول التقفيل الشامل 360° (`00-lock360-zero-gaps v2.9 — Adapter`)
 
 > **مصدر الحقيقة الواحد للمنهج والمراحل:** [`./gist/01-CORE-PROMPT-360-v2.md`](./gist/01-CORE-PROMPT-360-v2.md) (`14` مرحلة + بوابة الصدق `[✅/⚠️/❓]` + حدود الصدق والقانون الحديدي + فيزياء الواقع + نوع الباب + `Kill Switch` + النملة والدبانة + مفتاح اللهجة + الأتراس `P / S / M / L`).
 > هذا الملف هو **المحوّل المحلي (`Adapter`)**: يحدد متى نعمل، بأي مستوى، وأي مرجع نحمّل، وكيف نربط المحرك الحتمي ومهارات البيئة دون تكرار المنهج.
@@ -72,6 +72,7 @@ description: >-
 - **عند `L3` أو أنظمة هندسية:** [`references/DOMAIN_MATRICES.md`](./references/DOMAIN_MATRICES.md) · [`references/ADVERSARIAL_CHECKLIST_360.md`](./references/ADVERSARIAL_CHECKLIST_360.md) (يضم سطح التهديد) · [`references/THREAT_MODEL_AND_SAFETY.md`](./references/THREAT_MODEL_AND_SAFETY.md).
 - **عند الحاجة لقالب نسخ سريع أو `Auto-Guard` أو بطاقة `FMEA`:** [`references/LOCK360_TEMPLATES.md`](./references/LOCK360_TEMPLATES.md) · **عند تقييم جودة المهارة نفسها:** [`references/EVAL_AND_GUARDRAILS.md`](./references/EVAL_AND_GUARDRAILS.md).
 - **قبل تثبيت أي مهارة (سلسلة التوريد):** شغّل `python3 scripts/lock360.py audit-skill <المسار> [--strict]` ثم أكمل الحكم البشري في [`references/SKILL_AUDIT_CHECKLIST.md`](./references/SKILL_AUDIT_CHECKLIST.md) · **لمعرفة ما الموجود ومتى تستخدمه:** [`references/COMPLETE_SKILLS_CATALOG.md`](./references/COMPLETE_SKILLS_CATALOG.md).
+- **عند حادث حي (خدمة واقعة / انقطاع / فقدان أو تسريب بيانات / `outage` / `sev-1`):** `route` يرفع تلقائياً إلى `L3 / L`؛ ابدأ بالاحتواء وحفظ الأدلة وفق [`references/INCIDENT_RECOVERY_AND_RUNBOOKS.md`](./references/INCIDENT_RECOVERY_AND_RUNBOOKS.md) و`python3 scripts/lock360.py runbook [--severity S1|S2|S3]` (فحص `F-INCIDENT-CONTAINMENT` يمنع الإغلاق بلا احتواء وأدلة).
 - **عند موديل ضعيف أو واجهة شات بلا أدوات:** [`prompts/WEAK-MODEL-BOOSTER.md`](./prompts/WEAK-MODEL-BOOSTER.md) · [`prompts/QUICK-START.md`](./prompts/QUICK-START.md).
 
 ---

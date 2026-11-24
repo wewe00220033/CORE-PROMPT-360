@@ -1,8 +1,8 @@
 <div dir="rtl">
 
-# 🔒 CORE-PROMPT-360 — بروتوكول التقفيل الشامل 360° بالضبة والمفتاح (`v2.8` — 🐜🪰 Ant & Fly Hermetic Edition)
+# 🔒 CORE-PROMPT-360 — بروتوكول التقفيل الشامل 360° بالضبة والمفتاح (`v2.9` — 🐜🪰 Ant & Fly Hermetic Edition)
 
-> **مستودع جاهز كـ Skill محمولة + نواة برومبت عالمية + محرك تحقق حتمي** لنقل منهجية `Lock360 v2.8` إلى **أي جهاز** (Windows / macOS / Linux) وأي أداة ذكاء اصطناعي (Antigravity / OpenCode / Claude / Gemini / ChatGPT / DeepSeek / أي موديل ضعيف).
+> **مستودع جاهز كـ Skill محمولة + نواة برومبت عالمية + محرك تحقق حتمي** لنقل منهجية `Lock360 v2.9` إلى **أي جهاز** (Windows / macOS / Linux) وأي أداة ذكاء اصطناعي (Antigravity / OpenCode / Claude / Gemini / ChatGPT / DeepSeek / أي موديل ضعيف).
 > **الجديد في Ant & Fly Hermetic Edition:** الموديل هو الحلّال و`scripts/lock360.py` هو المُحقِّق — 🐜 **مصيدة النمل** تلتقط الثغرات الأرضية الدقيقة في المخرج (مرحلة غائبة، جدول، ثقة في المكان الغلط، سر)، و🪰 **شبكة الدبان** تصطاد الانحراف في الجو (مجاملة، تبرير بدل دليل، نجاح كاذب، تخفيض ترس صامت)، مع مفتاح لهجة بشري/هندسي تلقائي وبوستر للموديلات الضعيفة.
 > *(ملاحظة: هذا الدليل خاص بالتثبيت والنشر على الأجهزة عبر Git؛ لاستخدام البرومبت بالنسخ اليدوي المباشر اقرأ [`gist/00-README.md`](./gist/00-README.md)).*
 
@@ -12,10 +12,10 @@
 
 - **`SKILL.md` (`00-lock360-zero-gaps`):** المحوّل القياسي للأتراس ومستويات التشغيل (`L1/L2/L3 ↔ P/S/M/L`) — يشتغل فوراً بمجرد وجود المجلد في مسار المهارات.
 - **`gist/`:** النواة المحمولة المكتفية بذاتها ([`01-CORE-PROMPT-360-v2.md`](./gist/01-CORE-PROMPT-360-v2.md)) بـ `14` مرحلة + بوابة الصدق المضادة للمجاملة `[✅/⚠️/❓]` + `Explicit Non-Goals` + فيزياء الواقع والميكانيكا + نوع الباب + `Kill Switch / Pre-Mortem` + `8` أسئلة تصيّد سريعة + [`02-LENSES.md`](./gist/02-LENSES.md) (7 عدسات تخصصية) + [`03-EXAMPLES.md`](./gist/03-EXAMPLES.md) + [`04-CHANGELOG.md`](./gist/04-CHANGELOG.md).
-- **`references/`:** مراجع `L3` التقنية ([`DOMAIN_MATRICES.md`](./references/DOMAIN_MATRICES.md)، [`ADVERSARIAL_CHECKLIST_360.md`](./references/ADVERSARIAL_CHECKLIST_360.md)، [`LOCK360_TEMPLATES.md`](./references/LOCK360_TEMPLATES.md)) + مراجع `v2.8`: كتالوج النملة والدبانة [`ANT_AND_FLY_TRAPS.md`](./references/ANT_AND_FLY_TRAPS.md) · قاموس اللهجة [`TONE_GLOSSARY.md`](./references/TONE_GLOSSARY.md) · خريطة جميع الحالات [`ALL_CASES_COVERAGE_MAP.md`](./references/ALL_CASES_COVERAGE_MAP.md) · [`EVAL_AND_GUARDRAILS.md`](./references/EVAL_AND_GUARDRAILS.md) · [`THREAT_MODEL_AND_SAFETY.md`](./references/THREAT_MODEL_AND_SAFETY.md) · [`SOURCES_AND_INSPIRATIONS.md`](./references/SOURCES_AND_INSPIRATIONS.md) + مراجع `v2.8`: قائمة تدقيق المهارات [`SKILL_AUDIT_CHECKLIST.md`](./references/SKILL_AUDIT_CHECKLIST.md) · الكتالوج الكامل [`COMPLETE_SKILLS_CATALOG.md`](./references/COMPLETE_SKILLS_CATALOG.md).
+- **`references/`:** مراجع `L3` التقنية ([`DOMAIN_MATRICES.md`](./references/DOMAIN_MATRICES.md)، [`ADVERSARIAL_CHECKLIST_360.md`](./references/ADVERSARIAL_CHECKLIST_360.md)، [`LOCK360_TEMPLATES.md`](./references/LOCK360_TEMPLATES.md)) + مراجع المحرك الحتمي: كتالوج النملة والدبانة [`ANT_AND_FLY_TRAPS.md`](./references/ANT_AND_FLY_TRAPS.md) · قاموس اللهجة [`TONE_GLOSSARY.md`](./references/TONE_GLOSSARY.md) · خريطة جميع الحالات [`ALL_CASES_COVERAGE_MAP.md`](./references/ALL_CASES_COVERAGE_MAP.md) · [`EVAL_AND_GUARDRAILS.md`](./references/EVAL_AND_GUARDRAILS.md) · [`THREAT_MODEL_AND_SAFETY.md`](./references/THREAT_MODEL_AND_SAFETY.md) · [`SOURCES_AND_INSPIRATIONS.md`](./references/SOURCES_AND_INSPIRATIONS.md) + مراجع سلسلة التوريد والحوادث: قائمة تدقيق المهارات [`SKILL_AUDIT_CHECKLIST.md`](./references/SKILL_AUDIT_CHECKLIST.md) · الكتالوج الكامل [`COMPLETE_SKILLS_CATALOG.md`](./references/COMPLETE_SKILLS_CATALOG.md) · الحوادث والاستعادة وRunbooks [`INCIDENT_RECOVERY_AND_RUNBOOKS.md`](./references/INCIDENT_RECOVERY_AND_RUNBOOKS.md).
 - **`workflows/00-lock360-zero-gaps.md`:** سير عمل `/lock360`.
-- **`scripts/`:** المحرك الحتمي [`lock360.py`](./scripts/lock360.py) (`route` · `audit` · `skeleton` · `catalog` · `eval` — stdlib فقط) + مثبّت آمن لـ Windows ([`install.ps1`](./scripts/install.ps1)) وmacOS/Linux ([`install.sh`](./scripts/install.sh)) مع النسخ الاحتياطي وإلغاء التثبيت ودعم OpenCode + أداة الفحص [`verify_repo.py`](./scripts/verify_repo.py).
-- **`tests/`:** [`eval_cases.json`](./tests/eval_cases.json) — 75 حالة اختبار أحمر-أخضر للمحرك (توجيه، ترقية، لهجة، منع الإفراط في التشغيل، كل نملة ودبانة، تدقيق سلسلة توريد المهارات `SA-*`) + فكستشرات `S/M/L/P`.
+- **`scripts/`:** المحرك الحتمي [`lock360.py`](./scripts/lock360.py) (`route` · `audit` · `audit-skill` · `runbook` · `skeleton` · `catalog` · `eval` — stdlib فقط) + مثبّت آمن لـ Windows ([`install.ps1`](./scripts/install.ps1)) وmacOS/Linux ([`install.sh`](./scripts/install.sh)) مع النسخ الاحتياطي وإلغاء التثبيت ودعم OpenCode + أداة الفحص [`verify_repo.py`](./scripts/verify_repo.py).
+- **`tests/`:** [`eval_cases.json`](./tests/eval_cases.json) — 80 حالة اختبار أحمر-أخضر للمحرك (توجيه، ترقية، لهجة، منع الإفراط في التشغيل، كل نملة ودبانة، تدقيق سلسلة توريد المهارات `SA-*`، تصعيد الحوادث واحتواؤها `F-INCIDENT-CONTAINMENT`) + فكستشرات `S/M/L/P`.
 - **`prompts/`:** كتل نسخ جاهزة لكل ترس + `/patch-360` ([`QUICK-START.md`](./prompts/QUICK-START.md)) + بوستر الموديلات الضعيفة [`WEAK-MODEL-BOOSTER.md`](./prompts/WEAK-MODEL-BOOSTER.md) (`CORE-MINI` + هيكل + تمريرة تحقق مستقلة + إصلاح محدود).
 - **`platforms/`:** تعليمات التثبيت على OpenCode / Claude Code / Codex / Cursor / Windsurf / ChatGPT / أي AI ([`platforms/README.md`](./platforms/README.md)).
 - **`skills-pack/`:** حزمة الترحيل الكاملة لأي جهاز جديد — تضم الـ `23` مهارة المكمّلة (`24` مهارة إجمالاً مع `00-lock360-zero-gaps`) + `workflows` + `rules` + قالب `GEMINI.template.md` منظّف من أي أسرار ([`skills-pack/README.md`](./skills-pack/README.md)).
@@ -106,14 +106,14 @@ git clone https://github.com/wewe00220033/CORE-PROMPT-360.git .agents/skills/00-
 
 ### 4️⃣ الاستخدام المباشر في ChatGPT / Claude / DeepSeek / Gemini Web
 
-انسخ محتوى [`gist/01-CORE-PROMPT-360-v2.md`](./gist/01-CORE-PROMPT-360-v2.md) أو وجّه أي ذكاء اصطناعي لرابط `raw` المثبّت على الإصدار `v2.8`:
+انسخ محتوى [`gist/01-CORE-PROMPT-360-v2.md`](./gist/01-CORE-PROMPT-360-v2.md) أو وجّه أي ذكاء اصطناعي لرابط `raw` المثبّت على الإصدار `v2.9`:
 
 </div>
 
-- **Core Prompt (`v2.8`):** `https://raw.githubusercontent.com/wewe00220033/CORE-PROMPT-360/v2.8/gist/01-CORE-PROMPT-360-v2.md`
-- **Plugin Lenses:** `https://raw.githubusercontent.com/wewe00220033/CORE-PROMPT-360/v2.8/gist/02-LENSES.md`
-- **Examples (`P/S/M/L`):** `https://raw.githubusercontent.com/wewe00220033/CORE-PROMPT-360/v2.8/gist/03-EXAMPLES.md`
-- **Prompt Guide:** `https://raw.githubusercontent.com/wewe00220033/CORE-PROMPT-360/v2.8/gist/00-README.md`
+- **Core Prompt (`v2.9`):** `https://raw.githubusercontent.com/wewe00220033/CORE-PROMPT-360/v2.9/gist/01-CORE-PROMPT-360-v2.md`
+- **Plugin Lenses:** `https://raw.githubusercontent.com/wewe00220033/CORE-PROMPT-360/v2.9/gist/02-LENSES.md`
+- **Examples (`P/S/M/L`):** `https://raw.githubusercontent.com/wewe00220033/CORE-PROMPT-360/v2.9/gist/03-EXAMPLES.md`
+- **Prompt Guide:** `https://raw.githubusercontent.com/wewe00220033/CORE-PROMPT-360/v2.9/gist/00-README.md`
 - **كتل نسخ جاهزة (`P/S/M/L` + `/patch-360`):** [`prompts/QUICK-START.md`](./prompts/QUICK-START.md)
 
 <div dir="rtl">
@@ -130,7 +130,7 @@ git clone https://github.com/wewe00220033/CORE-PROMPT-360.git .agents/skills/00-
 
 ![verify](https://github.com/wewe00220033/CORE-PROMPT-360/actions/workflows/verify.yml/badge.svg)
 
-أداة فحص بـ Python القياسية فقط ([`scripts/verify_repo.py`](./scripts/verify_repo.py)) تتأكد من: لا BOM، نهايات أسطر LF، `install.ps1` بـ ASCII، صفر أسرار أو مسارات أجهزة، سلامة الروابط النسبية، تطابق الإصدار مع `VERSION` (حتى صيغة `الإصدار: 2.x` بدون `v`)، صفر جداول Markdown، صحة `install.sh` و`.github/workflows/*.yml` وقوالب `.github/ISSUE_TEMPLATE/*.yml`، ومطابقة بصمات [`MANIFEST.sha256`](./MANIFEST.sha256)، ونجاح `lock360.py --selftest` و`eval` (75 حالة) و`audit-skill . --strict` و`audit-skill skills-pack/skills` (صفر `FAIL` في سلسلة التوريد). نفس الفحص + `eval` + `audit-skill` + round-trip لـ `--opencode` يعمل على Ubuntu **و**Windows + تثبيت/إلغاء تثبيت كامل على كليهما تلقائياً في [`.github/workflows/verify.yml`](./.github/workflows/verify.yml).
+أداة فحص بـ Python القياسية فقط ([`scripts/verify_repo.py`](./scripts/verify_repo.py)) تتأكد من: لا BOM، نهايات أسطر LF، `install.ps1` بـ ASCII، صفر أسرار أو مسارات أجهزة، سلامة الروابط النسبية، تطابق الإصدار مع `VERSION` (حتى صيغة `الإصدار: 2.x` بدون `v`)، صفر جداول Markdown، صحة `install.sh` و`.github/workflows/*.yml` وقوالب `.github/ISSUE_TEMPLATE/*.yml`، ومطابقة بصمات [`MANIFEST.sha256`](./MANIFEST.sha256)، ونجاح `lock360.py --selftest` و`eval` (80 حالة) و`audit-skill . --strict` و`audit-skill skills-pack/skills` (صفر `FAIL` في سلسلة التوريد). نفس الفحص + `eval` + `audit-skill` + round-trip لـ `--opencode` يعمل على Ubuntu **و**Windows + تثبيت/إلغاء تثبيت كامل على كليهما تلقائياً في [`.github/workflows/verify.yml`](./.github/workflows/verify.yml).
 
 </div>
 
@@ -177,8 +177,9 @@ python -X utf8 scripts\verify_repo.py --update-manifest
 
 - **`route`:** `python3 scripts/lock360.py route --text "قفّل 360 على ..."` ⬅ الترس والمستوى واللهجة والعدسات بنفس قواعد `SKILL.md` حرفياً.
 - **`audit`:** `python3 scripts/lock360.py audit --output <رد_الموديل> --gear <P/S/M/L> [--request <الطلب>]` ⬅ 🐜 نمل · 🪰 دبان · 🦟 ناموس؛ 🔴 يمنع الإغلاق، 🟠 يُقبل مع ذكره في `3.14`.
-- **`audit-skill`** (جديد في `v2.8`): `python3 scripts/lock360.py audit-skill <مجلد_المهارة | SKILL.md | مجلد_مهارات> [--strict]` ⬅ 🛡️ تدقيق سلسلة التوريد قبل التثبيت (فرونت ماتر، BOM/قلب اتجاه، تنزيل-إلى-shell، أسرار، حقن برومبت، روابط، محفّزات سلبية، حجم، جداول RTL) — الحكم البشري المكمّل في [`SKILL_AUDIT_CHECKLIST.md`](./references/SKILL_AUDIT_CHECKLIST.md)، والفهرس الكامل في [`COMPLETE_SKILLS_CATALOG.md`](./references/COMPLETE_SKILLS_CATALOG.md).
-- **`skeleton`** للموديلات الضعيفة · **`eval`** لاختبارات `tests/eval_cases.json` (75 حالة) · **`catalog --md`** يولّد [`ANT_AND_FLY_TRAPS.md`](./references/ANT_AND_FLY_TRAPS.md).
+- **`audit-skill`:** `python3 scripts/lock360.py audit-skill <مجلد_المهارة | SKILL.md | مجلد_مهارات> [--strict]` ⬅ 🛡️ تدقيق سلسلة التوريد قبل التثبيت (فرونت ماتر، BOM/قلب اتجاه، تنزيل-إلى-shell، أسرار، حقن برومبت، روابط، محفّزات سلبية، حجم، جداول RTL) — الحكم البشري المكمّل في [`SKILL_AUDIT_CHECKLIST.md`](./references/SKILL_AUDIT_CHECKLIST.md)، والفهرس الكامل في [`COMPLETE_SKILLS_CATALOG.md`](./references/COMPLETE_SKILLS_CATALOG.md).
+- **`runbook`** (جديد في `v2.9`): `python3 scripts/lock360.py runbook [--severity S1|S2|S3] [--title "..."]` ⬅ 🚨 كتيّب حوادث `RTL-Safe` حتمي (احتواء، تشخيص، استعادة، ما بعد الحادث) + بطاقة `Runbook` جاهزة للنسخ؛ `route` يصعّد الحوادث الحية تلقائياً إلى `L3 / الترس L`، وفحص الدبان `F-INCIDENT-CONTAINMENT` في `audit` (ترس `M/L`) 🔴 يمنع الإغلاق لأي حادث حي بلا احتواء أو حفظ أدلة.
+- **`skeleton`** للموديلات الضعيفة · **`eval`** لاختبارات `tests/eval_cases.json` (80 حالة) · **`catalog --md`** يولّد [`ANT_AND_FLY_TRAPS.md`](./references/ANT_AND_FLY_TRAPS.md).
 
 ---
 

@@ -18,6 +18,10 @@ Commands
            --strict turns WARN into exit 1. Exit 2 when no SKILL.md is found.
   skeleton [--gear X] [--tone X]
            Prints the stage skeleton a weak model must fill verbatim.
+  runbook  [--severity S1|S2|S3] [--title "..."]
+           Prints an RTL-safe incident runbook (containment, diagnosis, recovery,
+           postmortem) plus a copy-ready Runbook card. Live incidents are also
+           auto-escalated by `route` to L3 / gear L (incident_signals).
   catalog  [--md] [--out FILE]
            Prints the check catalog (RTL-safe markdown with --md).
   eval     [--cases FILE] [--json]
@@ -133,7 +137,12 @@ TONE_HUMAN = rx(r"أمي|أبويا|مراتي|جوزي|ابني|بنتي|أخو
                 r"الإجازة|أستقيل|شغلي|مديري|البيت|الأولاد|العيال")
 TONE_ENG = rx(r"كود|code|api|سيرفر|server|deploy|script|سكربت|bug|باج|database|قاعدة بيانات|git|"
               r"commit|docker|pipeline|function|دالة|endpoint|schema|migration|توكن|token|لوج|log|"
-              r"exception|unit test|python|javascript|sql|سحابة|cloud|cron|json|yaml")
+              r"exception|unit test|python|javascript|sql|سحابة|cloud|cron|json|yaml|"
+              r"production|outage|incident|rollback|runbook|برودكشن")
+# Live-incident signals: any hit forces L3 / gear L in route() (except /patch-360 mode).
+INCIDENT_RE = rx(r"السيرفر وقع|النظام وقع|الخدمة وقعت|عطل شامل|انقطاع الخدمة|توقف الخدمة|فقدان بيانات|تسريب بيانات|"
+                 r"اختراق أمني|\boutage\b|\bsev-?[12]\b|\bp0\b|production down|prod is down|service down|data loss|"
+                 r"security breach|incident response")
 TONE_CONTEXT = rx(r"السياق\s*[:：]\s*\[?([^\]\n]+)")
 TONE_OVERRIDE = rx(r"أسلوب العرض[^:：\n]*[:：]\s*\[?\s*(بشري|هندسي|تلقائي|human|engineering|mixed)")
 # Engineering jargon that must not leak into a human-tone output (3+ distinct = leak).
@@ -248,6 +257,12 @@ def route(text):
         gear = "L"
         if level in ("none", "L1"):
             level = "L2"
+    inc_hits = sorted(set(m.group(0) for m in INCIDENT_RE.finditer(raw)))
+    if inc_hits and mode != "patch":
+        if gear != "L":
+            escalated = True
+            reasons.append("live incident -> forced L3 / gear L: %s" % ", ".join(inc_hits))
+        gear, level = "L", "L3"
     if requested and gear and gear != requested and not escalated:
         reasons.append("requested %s kept" % requested)
 
@@ -256,6 +271,7 @@ def route(text):
     return {
         "mode": mode, "level": level, "gear": gear, "requested_gear": requested,
         "escalated": escalated, "tone": tone, "tone_source": tone_src, "lenses": lenses,
+        "incident": bool(inc_hits), "incident_signals": inc_hits,
         "explicit_triggers": explicit, "light_signals": light, "one_way_door": one_way,
         "required_stages": GEAR_STAGES.get(gear, []) if gear else [],
         "word_cap": WORD_CAP.get(gear), "reasons": reasons,
@@ -748,6 +764,25 @@ def c_absolute(ctx):
     return ["absolute claim: %r" % m.group(0)] if m else []
 
 
+CONTAINMENT_RE = rx(r"احتواء|أوقف النزيف|عزل|نعزل|يوقف|إيقاف فوري|تعطيل|تجميد|rollback|رجوع|نرجع|kill switch|زر الطوارئ")
+FORENSIC_RE = rx(r"احفظ الأدلة|حفظ الأدلة|لوج|\blog\b|لقطة حالة|بصمة|snapshot|نسخة احتياطية")
+
+
+@check("F-INCIDENT-CONTAINMENT", "fly", "FAIL", ("M", "L"), "حادث حي بلا احتواء أو حفظ أدلة",
+       "الطلب يصف حادثاً/عطلاً حياً والمخرج يقفز للإصلاح دون خطوة احتواء/رجوع ودون حفظ اللوجات والأدلة.",
+       "ابدأ باحتواء النزيف (Kill Switch / عزل / رجوع) وحفظ اللوجات والبصمات قبل أي تعديل.")
+def c_incident_containment(ctx):
+    if not ctx["route"] or not ctx["route"].get("incident"):
+        return Skip("not an incident request")
+    t = ctx["doc"].text
+    missing = []
+    if not CONTAINMENT_RE.search(t):
+        missing.append("no containment / rollback step")
+    if not FORENSIC_RE.search(t):
+        missing.append("no forensic evidence preservation (logs / snapshot / hashes)")
+    return ["live incident (%s): %s" % (", ".join(ctx["route"]["incident_signals"]), m) for m in missing]
+
+
 # ---- mosquitoes (repeated buzz)
 @check("M-HEDGE-BUZZ", "mosquito", "WARN", "*", "تحوّط متكرر",
        "ربما/يبدو/غالباً/maybe أكثر من 8 مرات في S أو 20 في M/L.", "حوّل كل تحوّط إلى ⚠️ [مستنتج] بسبب، أو إلى سؤال في 3.12.")
@@ -888,6 +923,62 @@ def skeleton(gear, tone="mixed"):
         out.append("- " + r)
     if tone == "human":
         out.append("- لهجة بشرية يومية دافئة: بلا مصطلحات برمجية أو إنجليزية بين قوسين (انظر TONE_GLOSSARY.md).")
+    return "\n".join(out)
+
+
+# ------------------------------------------------------------------ runbook
+SEVERITY_HINT = {
+    "S1": "خدمة واقعة أو بيانات مهددة — تصعيد فوري، المالك يقرر خلال دقائق",
+    "S2": "تدهور ملموس للعملاء — تصعيد خلال 15 دقيقة",
+    "S3": "أثر محدود أو داخلي — يُعالج في نفس اليوم ويُذكر في التقرير",
+}
+
+
+def runbook_template(severity="S1", title="Incident Title"):
+    sev = (severity or "S1").upper()
+    if sev not in SEVERITY_HINT:
+        raise ValueError("unknown severity %r (use S1, S2 or S3)" % severity)
+    title = title or "Incident Title"
+    out = [
+        "🚨 Lock360 runbook — %s · %s (%s) · v%s" % (title, sev, SEVERITY_HINT[sev], read_version().lstrip("v")),
+        "",
+        "🧯 1) أول 15 دقيقة — الاحتواء أولاً (3.11)",
+        "- أعلن الحادث: ماذا تعطل؟ منذ متى؟ من المتأثر؟ الخطورة %s؟ نطاق الأثر الآن وأسوأ توسع؟" % sev,
+        "- أوقف النزيف: Kill Switch / عزل / إيقاف النشر / تجميد الكتابة — ممنوع الترقيع الأعمى على الإنتاج.",
+        "- احفظ الأدلة قبل أي حذف أو إعادة تشغيل: لوجات، مقاييس، snapshot / نسخة احتياطية، بصمة commit/release، طابع زمني لأول عرض.",
+        "- مالك واحد (Incident Owner) ومنفّذ واحد ومُبلّغ واحد وقناة واحدة مؤرّخة.",
+        "",
+        "🔎 2) التشخيص بالدليل (3.8)",
+        "- أعد الإنتاج بأمان (بيئة مشابهة / replay ببيانات مجهّلة) — لا على الإنتاج.",
+        "- متغير واحد في كل مرة · 3 إصلاحات فاشلة = توقف وأعد فحص النمط المعماري.",
+        "- عرض ⬅ سبب: نشر؟ اعتماد خارجي؟ سعة؟ بيانات؟ صلاحيات؟ وقت؟ لكل فرضية دليلها ووسمها ✅ [مؤكد] · ⚠️ [مستنتج] · ❓ [مجهول].",
+        "",
+        "♻️ 3) الاستعادة الآمنة (3.6 / 3.11)",
+        "- فضّل Rollback المُتحقَّق منه على الإصلاح الأمامي لو أسرع أو أقل خطراً.",
+        "- تحقق بدليل طازج: health خارجي · بيانات قبل-بعد · طوابير · تنبيهات خمدت · لوج نظيف بعد آخر تعديل.",
+        "- أبلغ بإيقاع ثابت: ما حدث، أثره، ما تم، المتبقي، موعد التحديث القادم.",
+        "",
+        "📝 4) ما بعد الحادث بلا لوم (3.7 / 3.10)",
+        "- خط زمني مؤرّخ: اكتشاف ⬅ استجابة ⬅ احتواء ⬅ استعادة.",
+        "- سبب جذري + شروط كامنة · ما نجح وما فشل (كشف، تنبيه، runbook، صلاحيات، rollback).",
+        "- إجراءات وقائية بمالك وموعد ومعيار إغلاق واختبار يمنع التكرار، ثم /patch-360.",
+        "",
+        "📋 5) بطاقة الـ Runbook (املأ كل بند؛ المجهول يُكتب ❓ [مجهول] لا يُحذف)",
+        "Runbook: %s" % title,
+        "Trigger: [التنبيه أو العرض الذي يشغّل هذا الـ Runbook]",
+        "Severity: %s — %s" % (sev, SEVERITY_HINT[sev]),
+        "Owner: [Incident Owner] · Executor: [من يلمس الإنتاج] · Comms: [من يبلغ] · Channel: [قناة واحدة]",
+        "Blast Radius: [من/ما يتأثر الآن] ⬅ [أسوأ توسع لو لم نتدخل]",
+        "Containment: [Kill Switch / عزل / إيقاف نشر / تجميد كتابة] ⬅ [خطوة محددة] ⬅ [كيف أتأكد أنها نفذت]",
+        "Evidence to preserve: [لوجات] · [مقاييس] · [snapshot / نسخة احتياطية] · [commit/release SHA] · [طابع زمني]",
+        "Diagnosis: 1. [فرضية + دليل + وسم] 2. [...] 3. [...] — متغير واحد في كل مرة · 3 فشل = توقف",
+        "Rollback: [النسخة الآمنة المعروفة] ⬅ [خطوات الرجوع المختبرة] ⬅ [زمن الرجوع المتوقع]",
+        "Verification: [health خارجي] · [بيانات قبل-بعد] · [طوابير] · [تنبيهات خمدت] · [لوج نظيف]",
+        "Escalation: [متى ولمن] ⬅ S1 فوراً · S2 خلال 15 دقيقة · S3 في تقرير اليوم",
+        "Post-incident tasks: [خط زمني] · [سبب جذري + شروط كامنة] · [إجراءات بمالك وموعد] · [/patch-360]",
+        "",
+        "➡ راجع الحادث بالترس L كاملاً ثم: python3 scripts/lock360.py audit --output <ردك> --gear L --request <الطلب> (F-INCIDENT-CONTAINMENT يمنع الإغلاق بلا احتواء وأدلة).",
+    ]
     return "\n".join(out)
 
 
@@ -1309,6 +1400,22 @@ def selftest():
     ok(r["level"] == "none" and r["gear"] is None, "route anti over-trigger")
     r = route("/patch-360 — نسيت مرحلة الصيانة")
     ok(r["mode"] == "patch", "route patch mode")
+    r = route("السيرفر وقع وحصل انقطاع الخدمة عند العملاء")
+    ok(r["incident"] and r["gear"] == "L" and r["level"] == "L3" and r["escalated"], "route incident -> L3/L")
+    ok(not route("عايز أشتري لابتوب جديد")["incident"], "route non-incident stays off")
+    inc_req = "حصل انقطاع الخدمة وفقدان بيانات أثناء النقل"
+    inc_good = GOOD_S.replace("### 3.11 التراجع والتوقف", "### 3.11 التراجع والتوقف\n- احتواء أولاً: نعزل الخدمة ونحفظ اللوج والبصمة قبل أي تعديل.")
+    a = audit(inc_good, request=inc_req, gear="S")
+    ok("F-INCIDENT-CONTAINMENT" not in set(f["id"] for f in a["findings"]), "incident containment PASS (gear S skips)")
+    a = audit(inc_good, request=inc_req, gear="M")
+    ok("F-INCIDENT-CONTAINMENT" not in set(f["id"] for f in a["findings"]), "incident containment PASS with evidence")
+    inc_bad = GOOD_S.replace("نرجع للوضع القديم", "نكمل").replace("زر الطوارئ: أي تعارض مع النوم. مسار الرجوع: نوقف ونرجع للروتين القديم فوراً بلا تكلفة.", "نكمل الروتين.")
+    a = audit(inc_bad, request=inc_req, gear="M")
+    ok("F-INCIDENT-CONTAINMENT" in set(f["id"] for f in a["findings"]), "incident containment FAIL without containment/evidence")
+    a = audit(GOOD_S, request="قفّل 360 على خطة التجربة", gear="M")
+    ok(any(s["id"] == "F-INCIDENT-CONTAINMENT" for s in a["skipped"]), "incident check skipped for non-incident request")
+    rb = runbook_template("S1")
+    ok("Runbook:" in rb and "Rollback:" in rb and "S1" in rb and not any(l.lstrip().startswith("|") for l in rb.split("\n")), "runbook template S1 RTL-safe")
     a = audit(GOOD_S, gear="S")
     ok(a["verdict"] == "PASS", "audit good S should PASS: %s" % [f["id"] for f in a["findings"]])
     bad = GOOD_S.replace("الترس: S لأن", "فكرة رائعة! الترس: S لأن").replace("- ⭐ قبل", "| a | b |\n|---|---|\n- ⭐ قبل")
@@ -1400,6 +1507,8 @@ def main(argv):
             print("- explicit: %s" % (", ".join(r["explicit_triggers"]) or "-"))
             print("- light: %s" % (", ".join(r["light_signals"]) or "-"))
             print("- one-way door: %s" % (", ".join(r["one_way_door"]) or "-"))
+            if r["incident"]:
+                print("- incident: %s" % ", ".join(r["incident_signals"]))
             print("- lenses: %s" % (", ".join(r["lenses"]) or "-"))
             print("- stages: %s" % (", ".join(r["required_stages"]) or "-"))
             for why in r["reasons"]:
@@ -1422,6 +1531,13 @@ def main(argv):
         return 1 if r["verdict"] == "FAIL" else 0
     if cmd == "skeleton":
         print(skeleton(opt(args, "--gear", "M"), opt(args, "--tone", "mixed")))
+        return 0
+    if cmd == "runbook":
+        try:
+            print(runbook_template(opt(args, "--severity", "S1"), opt(args, "--title", "Incident Title")))
+        except ValueError as exc:
+            print("runbook: %s" % exc)
+            return 2
         return 0
     if cmd == "catalog":
         if "--md" in args:

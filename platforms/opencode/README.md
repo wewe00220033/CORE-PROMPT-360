@@ -1,4 +1,4 @@
-# 🟣 OpenCode — Lock360 `v2.8` كـ Skill + `AGENTS.md`
+# 🟣 OpenCode — Lock360 `v2.9` كـ Skill + `AGENTS.md`
 
 > **الاصطلاح (مؤكد من توثيق OpenCode V2):** المهارات العامة تُكتشف تلقائياً من `~/.config/opencode/skills/<id>/SKILL.md` (المعرّف = اسم المجلد)، والتعليمات العامة من `~/.config/opencode/AGENTS.md` ثم ملفات `AGENTS.md` في المشروع. وفي أي مجلد بلا `AGENTS.md` يقرأ `CLAUDE.md` كبديل. التوثيق: `https://opencode.ai/docs/skills` · `https://opencode.ai/docs/rules`
 
@@ -43,4 +43,4 @@ powershell -ExecutionPolicy Bypass -File "$HOME\CORE-PROMPT-360\scripts\install.
 ## ملاحظات
 
 - داخل OpenCode: `@00-lock360-zero-gaps` يحمّل المهارة صراحة، و`python3 ~/.config/opencode/skills/00-lock360-zero-gaps/scripts/lock360.py audit --output <رد> --gear <X>` يفحص أي مخرج قبل الإغلاق.
-- النواة الكاملة لقراءتها مباشرة: `https://raw.githubusercontent.com/wewe00220033/CORE-PROMPT-360/v2.8/gist/01-CORE-PROMPT-360-v2.md`
+- النواة الكاملة لقراءتها مباشرة: `https://raw.githubusercontent.com/wewe00220033/CORE-PROMPT-360/v2.9/gist/01-CORE-PROMPT-360-v2.md`
