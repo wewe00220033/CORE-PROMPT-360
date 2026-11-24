@@ -4,6 +4,14 @@
 
 ---
 
+## 🤝 v2.6 (2026-11-24) — جاهزية المساهمة والتحقق التشفيري وحصاد حزمة `v2.2` (`Antigravity × Fable`)
+- **سد ثغرة إصدار حقيقية:** سطر `الإصدار:` في النواة كان `2.3` بدون حرف `v` وبتاريخ قديم ولم يلتقطه الفاحص؛ تم توحيده مع `VERSION`، وأصبح فحص `(f)` يلتقط صيغة `الإصدار: 2.x` حتى بدون `v`.
+- **حصاد حزمة التقييم `v2.2` (بدون الرجوع للوراء):** دمج الكلمات المفتاحية عالية الاسترجاع في `SKILL.md` وفق تصنيف `Anti Over-Trigger` (صريح: `مفيش أي ثغرة` · `جميع التريكات` · `أي تريكاية` · `جميع الأقسام/الفروع` · `شمال يمين فوق تحت شرق غرب` · `من بره ومن جوه` · `zero gaps` — خفيف: `Red Team` · `Blast Radius` · `FMEA` — وأمر `/patch-360` كأمر مستقل لا يغيّر الترس)، وإضافة تحذير اختراع أنماط موازية للقائم و`Timeout ⬅ Tree Kill` وفحص التسرب في عدسة البرمجة، ودمج قائمة `Auto-Guard` المرجعية وبطاقة `FMEA` العمودية وقالب `/patch-360` السريع في `references/LOCK360_TEMPLATES.md`، وتذكير ثبات روابط `raw` عبر الوسوم في `gist/00-README.md`.
+- **جاهزية GitHub للمساهمات:** `CONTRIBUTING.md` (`RTL-Safe`) + `.github/ISSUE_TEMPLATE/` (`bug_report.yml` · `feature_or_lens.yml` · `config.yml`) + `.github/PULL_REQUEST_TEMPLATE.md` بقائمة تحقق إلزامية (الفاحص · `RTL-Safe` · منع الأسرار · `MANIFEST`).
+- **التحقق التشفيري `MANIFEST.sha256`:** بصمات كل الملفات المتتبعة في جذر المستودع، تُحسب على بايتات موحّدة النهايات (`CRLF ⬅ LF`) للملفات النصية و`*.ps1` فتتطابق 100% بين Windows (`eol=crlf`) وLinux/macOS؛ فحص `(k)` آلي + خيار `--update-manifest` في `verify_repo.py`.
+- **تحصين الفاحص والـ CI:** فحص `(l)` هيكلي لقوالب Issues (لا `tabs`، `name/description/body`، عنصر نموذج) + وجود قالب PR، وتشغيل `verify_repo.py` على Windows أيضاً داخل `.github/workflows/verify.yml`.
+- **إصلاح `install.sh`:** `uninstall_pack` و`install_pack` كانا ينهيان بـ `[ ... ] && echo` فيرجع الدالة بكود `1` تحت `set -e` عند عدم وجود نسخة احتياطية، ما قد يوقف `--uninstall --with-pack` قبل إزالة كتلة `GEMINI.md`؛ استُبدلت بـ `if` مع `return 0` صريح.
+
 ## 🧰 v2.5 (2026-11-24) — حزمة المهارات الشاملة (`skills-pack`) وترخيص `MIT`
 - **ترخيص المستودع:** إضافة [`LICENSE`](../LICENSE) (`MIT License`) وتضمينه في فحوصات النظافة والترميز.
 - **حزمة الترحيل الشاملة (`skills-pack/`):** ضم الـ `23` مهارة المكمّلة (لإجمالي `24` مهارة مع `00-lock360-zero-gaps`) + `workflows/` + `rules/` + قالب `GEMINI.template.md` منزوع التوكنات والمسارات الشخصية (`%USERPROFILE%` / `%LOCALAPPDATA%` / `<YOUR_TELEGRAM_*>`).

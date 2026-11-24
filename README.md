@@ -1,8 +1,8 @@
 <div dir="rtl">
 
-# 🔒 CORE-PROMPT-360 — بروتوكول التقفيل الشامل 360° بالضبة والمفتاح (`v2.5`)
+# 🔒 CORE-PROMPT-360 — بروتوكول التقفيل الشامل 360° بالضبة والمفتاح (`v2.6`)
 
-> **مستودع جاهز كـ Skill محمولة + نواة برومبت عالمية** لنقل منهجية `Lock360 v2.5` إلى **أي جهاز** (Windows / macOS / Linux) وأي أداة ذكاء اصطناعي (Antigravity / OpenCode / Claude / Gemini / ChatGPT / DeepSeek).
+> **مستودع جاهز كـ Skill محمولة + نواة برومبت عالمية** لنقل منهجية `Lock360 v2.6` إلى **أي جهاز** (Windows / macOS / Linux) وأي أداة ذكاء اصطناعي (Antigravity / OpenCode / Claude / Gemini / ChatGPT / DeepSeek).
 > *(ملاحظة: هذا الدليل خاص بالتثبيت والنشر على الأجهزة عبر Git؛ لاستخدام البرومبت بالنسخ اليدوي المباشر اقرأ [`gist/00-README.md`](./gist/00-README.md)).*
 
 ---
@@ -18,6 +18,8 @@
 - **`platforms/`:** تعليمات التثبيت على OpenCode / Claude Code / Cursor / ChatGPT ([`platforms/README.md`](./platforms/README.md)).
 - **`skills-pack/`:** حزمة الترحيل الكاملة لأي جهاز جديد — تضم الـ `23` مهارة المكمّلة (`24` مهارة إجمالاً مع `00-lock360-zero-gaps`) + `workflows` + `rules` + قالب `GEMINI.template.md` منظّف من أي أسرار ([`skills-pack/README.md`](./skills-pack/README.md)).
 - **`archive/`:** النص الأصلي `v1.x` للرجوع التاريخي فقط ([`archive/README.md`](./archive/README.md)).
+- **`CONTRIBUTING.md` + `.github/`:** دليل المساهمة `RTL-Safe` ([`CONTRIBUTING.md`](./CONTRIBUTING.md)) + قوالب Issues (`bug_report` / `feature_or_lens`) وقالب Pull Request مع قائمة تحقق إلزامية.
+- **`MANIFEST.sha256`:** بصمات `SHA-256` لكل الملفات المتتبعة ([`MANIFEST.sha256`](./MANIFEST.sha256)) محسوبة على نهايات أسطر موحّدة فتتطابق على Windows وLinux/macOS، ويفحصها `verify_repo.py` آلياً.
 
 ---
 
@@ -91,14 +93,14 @@ git clone https://github.com/wewe00220033/CORE-PROMPT-360.git .agents/skills/00-
 
 ### 4️⃣ الاستخدام المباشر في ChatGPT / Claude / DeepSeek / Gemini Web
 
-انسخ محتوى [`gist/01-CORE-PROMPT-360-v2.md`](./gist/01-CORE-PROMPT-360-v2.md) أو وجّه أي ذكاء اصطناعي لرابط `raw` المثبّت على الإصدار `v2.5`:
+انسخ محتوى [`gist/01-CORE-PROMPT-360-v2.md`](./gist/01-CORE-PROMPT-360-v2.md) أو وجّه أي ذكاء اصطناعي لرابط `raw` المثبّت على الإصدار `v2.6`:
 
 </div>
 
-- **Core Prompt (`v2.5`):** `https://raw.githubusercontent.com/wewe00220033/CORE-PROMPT-360/v2.5/gist/01-CORE-PROMPT-360-v2.md`
-- **Plugin Lenses:** `https://raw.githubusercontent.com/wewe00220033/CORE-PROMPT-360/v2.5/gist/02-LENSES.md`
-- **Examples (`P/S/M/L`):** `https://raw.githubusercontent.com/wewe00220033/CORE-PROMPT-360/v2.5/gist/03-EXAMPLES.md`
-- **Prompt Guide:** `https://raw.githubusercontent.com/wewe00220033/CORE-PROMPT-360/v2.5/gist/00-README.md`
+- **Core Prompt (`v2.6`):** `https://raw.githubusercontent.com/wewe00220033/CORE-PROMPT-360/v2.6/gist/01-CORE-PROMPT-360-v2.md`
+- **Plugin Lenses:** `https://raw.githubusercontent.com/wewe00220033/CORE-PROMPT-360/v2.6/gist/02-LENSES.md`
+- **Examples (`P/S/M/L`):** `https://raw.githubusercontent.com/wewe00220033/CORE-PROMPT-360/v2.6/gist/03-EXAMPLES.md`
+- **Prompt Guide:** `https://raw.githubusercontent.com/wewe00220033/CORE-PROMPT-360/v2.6/gist/00-README.md`
 - **كتل نسخ جاهزة (`P/S/M/L` + `/patch-360`):** [`prompts/QUICK-START.md`](./prompts/QUICK-START.md)
 
 <div dir="rtl">
@@ -115,19 +117,35 @@ git clone https://github.com/wewe00220033/CORE-PROMPT-360.git .agents/skills/00-
 
 ![verify](https://github.com/wewe00220033/CORE-PROMPT-360/actions/workflows/verify.yml/badge.svg)
 
-أداة فحص بـ Python القياسية فقط ([`scripts/verify_repo.py`](./scripts/verify_repo.py)) تتأكد من: لا BOM، نهايات أسطر LF، `install.ps1` بـ ASCII، صفر أسرار أو مسارات أجهزة، سلامة الروابط النسبية، تطابق الإصدار مع `VERSION`، صفر جداول Markdown، وصحة `install.sh` و`.github/workflows/*.yml`. نفس الفحص + تثبيت/إلغاء تثبيت كامل على Ubuntu وWindows يعمل تلقائياً في [`.github/workflows/verify.yml`](./.github/workflows/verify.yml).
+أداة فحص بـ Python القياسية فقط ([`scripts/verify_repo.py`](./scripts/verify_repo.py)) تتأكد من: لا BOM، نهايات أسطر LF، `install.ps1` بـ ASCII، صفر أسرار أو مسارات أجهزة، سلامة الروابط النسبية، تطابق الإصدار مع `VERSION` (حتى صيغة `الإصدار: 2.x` بدون `v`)، صفر جداول Markdown، صحة `install.sh` و`.github/workflows/*.yml` وقوالب `.github/ISSUE_TEMPLATE/*.yml`، ومطابقة بصمات [`MANIFEST.sha256`](./MANIFEST.sha256). نفس الفحص يعمل على Ubuntu **و**Windows + تثبيت/إلغاء تثبيت كامل على كليهما تلقائياً في [`.github/workflows/verify.yml`](./.github/workflows/verify.yml).
 
 </div>
 
 **macOS / Linux:**
 ```bash
 python3 scripts/verify_repo.py
+# بعد تعديل أي ملف متتبع — حدّث البصمات ثم افحص:
+python3 scripts/verify_repo.py --update-manifest
 ```
 
 **Windows (PowerShell):**
 ```powershell
-python scripts\verify_repo.py
+python -X utf8 scripts\verify_repo.py
+# بعد تعديل أي ملف متتبع — حدّث البصمات ثم افحص:
+python -X utf8 scripts\verify_repo.py --update-manifest
 ```
+
+<div dir="rtl">
+
+---
+
+### 7️⃣ المساهمة (`Issues / Pull Requests`)
+
+[![contributing](https://img.shields.io/badge/contributing-guide-blue)](./CONTRIBUTING.md) [![issues](https://img.shields.io/github/issues/wewe00220033/CORE-PROMPT-360)](https://github.com/wewe00220033/CORE-PROMPT-360/issues) [![license](https://img.shields.io/badge/license-MIT-green)](./LICENSE)
+
+عايز تقترح عدسة جديدة أو إصلاحاً أو منصة أو ترقية `/patch-360` من تجربة حية؟ اقرأ [`CONTRIBUTING.md`](./CONTRIBUTING.md) (القواعد غير القابلة للكسر: `RTL-Safe` · صفر أسرار · إصدار واحد · `MANIFEST.sha256` محدّث)، ثم افتح [Issue](https://github.com/wewe00220033/CORE-PROMPT-360/issues/new/choose) بالقالب المناسب أو Pull Request يمر بقائمة التحقق والفاحص.
+
+</div>
 
 <div dir="rtl">
 

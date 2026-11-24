@@ -1,0 +1,70 @@
+name: "🐞 Bug report / بلاغ خلل"
+description: "Something in the core prompt, lenses, installers, or verifier is broken or inconsistent. خلل أو تناقض في النواة أو العدسات أو المثبّتات أو الفاحص."
+title: "[bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping close a gap. Please keep secrets, tokens, and personal machine paths out of this report.
+        شكراً لمساعدتك في سد ثغرة. من فضلك لا تضع أي أسرار أو توكنات أو مسارات شخصية من جهازك في هذا البلاغ.
+  - type: dropdown
+    id: area
+    attributes:
+      label: "Area / المنطقة"
+      description: "Where did the problem show up? أين ظهرت المشكلة؟"
+      options:
+        - "gist/ core prompt or lenses (النواة أو العدسات)"
+        - "SKILL.md adapter / workflows (المحوّل أو سير العمل)"
+        - "scripts/install.ps1 (Windows installer)"
+        - "scripts/install.sh (macOS / Linux installer)"
+        - "scripts/verify_repo.py or CI (الفاحص أو التكامل المستمر)"
+        - "platforms/ or prompts/ (المنصات أو كتل النسخ)"
+        - "skills-pack/ (حزمة المهارات)"
+        - "Documentation / RTL rendering (التوثيق أو العرض العربي)"
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: "Version / الإصدار"
+      description: "Content of the VERSION file or the raw tag you used. محتوى ملف VERSION أو الوسم المستخدم في الرابط."
+      placeholder: "v2.6"
+    validations:
+      required: true
+  - type: textarea
+    id: what_happened
+    attributes:
+      label: "What happened? / ماذا حدث؟"
+      description: "Expected vs actual. المتوقع مقابل الفعلي."
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: "Steps to reproduce / خطوات إعادة الإنتاج"
+      placeholder: |
+        1. ...
+        2. ...
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: "Ground-truth evidence / الدليل القاطع"
+      description: "Output of `python3 scripts/verify_repo.py`, installer logs, or a screenshot. Redact secrets and personal paths. مخرجات الفاحص أو لوج المثبّت أو لقطة شاشة (بدون أسرار أو مسارات شخصية)."
+      render: text
+  - type: input
+    id: environment
+    attributes:
+      label: "Environment / البيئة"
+      placeholder: "Windows 11 + PowerShell 5.1 / Ubuntu 24.04 + bash 5 / Antigravity / Claude Code ..."
+  - type: checkboxes
+    id: hygiene
+    attributes:
+      label: "Hygiene checklist / قائمة النظافة"
+      options:
+        - label: "This report contains no secrets, tokens, or personal machine paths. لا يحتوي البلاغ على أسرار أو توكنات أو مسارات شخصية."
+          required: true
+        - label: "I searched existing issues first. بحثت في الـ Issues الموجودة أولاً."
+          required: false

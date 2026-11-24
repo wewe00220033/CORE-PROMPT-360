@@ -86,6 +86,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Repo hygiene checks (Windows, CRLF checkout of *.ps1)
+        run: |
+          $ErrorActionPreference = "Stop"
+          python -X utf8 scripts\verify_repo.py
+          if ($LASTEXITCODE -ne 0) { throw "verify_repo.py failed on Windows with $LASTEXITCODE" }
+
       - name: Install round-trip (Windows PowerShell 5.1)
         run: |
           $ErrorActionPreference = "Stop"

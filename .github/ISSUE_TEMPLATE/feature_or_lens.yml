@@ -1,0 +1,54 @@
+name: "🔭 Feature, lens, platform, or /patch-360 / اقتراح عدسة أو ميزة أو منصة"
+description: "Propose a new lens, an extension slot, a platform guide, or a /patch-360 learned from a real run. اقتراح عدسة جديدة أو خانة توسعة أو منصة أو ترقية /patch-360 من تجربة حية."
+title: "[proposal]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        The core prompt must stay self-contained and RTL-safe (no Markdown tables in Arabic-facing files). Proposals that duplicate an existing stage are usually folded into that stage instead.
+        النواة يجب أن تبقى مكتفية بذاتها و`RTL-Safe` (بدون جداول Markdown في الملفات العربية). الاقتراحات التي تكرر مرحلة قائمة تُدمج فيها غالباً بدل إضافة مرحلة جديدة.
+  - type: dropdown
+    id: kind
+    attributes:
+      label: "Kind / النوع"
+      options:
+        - "New lens in gist/02-LENSES.md (عدسة جديدة)"
+        - "/patch-360 from a real run (ترقية من تجربة حية)"
+        - "Extension slot or core stage tweak (خانة توسعة أو تعديل مرحلة)"
+        - "New platform guide under platforms/ (منصة جديدة)"
+        - "Installer / verifier / CI improvement (تحسين المثبّت أو الفاحص)"
+        - "Documentation or examples (توثيق أو أمثلة)"
+    validations:
+      required: true
+  - type: textarea
+    id: gap
+    attributes:
+      label: "Where did the gap appear in reality? / أين ظهرت الفجوة في الواقع؟"
+      description: "Which stage (3.x) or gear (P/S/M/L) missed it, and what actually happened. أي مرحلة أو ترس غفل عنها وماذا حدث فعلاً."
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: "Proposed block / البلوك المقترح"
+      description: "Paste the ready-to-merge text (lens block, slot text, or changelog line). Use bullet lists and vertical cards, never Markdown tables. الصق النص الجاهز للدمج بقوائم وكروت رأسية بدون جداول."
+      render: markdown
+    validations:
+      required: true
+  - type: textarea
+    id: impact
+    attributes:
+      label: "Impact and blast radius / الأثر ونطاق التأثير"
+      description: "What improves, what could break, and which gears it touches. ما الذي يتحسن وما الذي قد ينكسر وأي أتراس يمس."
+  - type: checkboxes
+    id: rules
+    attributes:
+      label: "Repository rules / قواعد المستودع"
+      options:
+        - label: "No Markdown tables in Arabic-facing core or docs (RTL-Safe). لا جداول Markdown في النواة أو التوثيق العربي."
+          required: true
+        - label: "No secrets, tokens, or personal machine paths. لا أسرار أو توكنات أو مسارات شخصية."
+          required: true
+        - label: "I am willing to open a PR that passes `python3 scripts/verify_repo.py`. مستعد لفتح PR يمر بالفاحص."
+          required: false

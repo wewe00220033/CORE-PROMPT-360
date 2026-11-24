@@ -3,7 +3,16 @@
 
 Runs from any cwd (repo root is derived from __file__).
 Prints ASCII-only PASS/FAIL/SKIP lines and exits 1 when any check FAILs.
+
+Usage:
+  python3 scripts/verify_repo.py                    run every check
+  python3 scripts/verify_repo.py --update-manifest  rewrite MANIFEST.sha256, then run every check
+
+MANIFEST.sha256 digests are computed over EOL-normalized bytes (CRLF -> LF) for
+text files, including *.ps1 which git checks out as CRLF on Windows, so the
+manifest verifies identically on Windows, Linux and macOS.
 """
+import hashlib
 import os
 import re
 import shutil
@@ -15,10 +24,11 @@ sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SELF_REL = "scripts/verify_repo.py"
+MANIFEST_REL = "MANIFEST.sha256"
 
 TEXT_EXTS = {".md", ".sh", ".py", ".yml", ".yaml", ".snippet", ".mdc",
              ".json", ".svg", ".gitattributes", ".gitignore"}
-TEXT_NAMES = {"VERSION", "LICENSE", ".gitattributes", ".gitignore"}
+TEXT_NAMES = {"VERSION", "LICENSE", ".gitattributes", ".gitignore", MANIFEST_REL}
 
 RESULTS = []  # (status, check, message)
 
@@ -196,7 +206,9 @@ def check_forbidden(files):
     sibling_re = re.compile("|".join(re.escape(s) for s in SIBLING_SKILLS))
     scanned = 0
     for rel in files:
-        if rel == SELF_REL:
+        # The manifest is pure hex digests: random hex can collide with digit-only
+        # leak patterns, so it is excluded here and verified by check (k) instead.
+        if rel in (SELF_REL, MANIFEST_REL):
             continue
         scanned += 1
         text = read_text(rel)
@@ -265,6 +277,10 @@ def check_links(files):
 
 # ---------------------------------------------------------------- (f) version
 VERSION_RE = re.compile(r"\bv2\.\d+\b")
+# Arabic label "<al-isdar>:" optionally followed by markdown emphasis / backtick,
+# then a bare "2.x" or "v2.x". Catches an unprefixed "2.3" that VERSION_RE misses.
+VERSION_LABEL_RE = re.compile(
+    "\u0627\u0644\u0625\u0635\u062f\u0627\u0631:[\\s*`]*(v?)(2\\.\\d+)\\b")
 
 
 def check_version(files):
@@ -278,6 +294,7 @@ def check_version(files):
         return 1
     bad = 0
     hits = 0
+    label_hits = 0
     for rel in files:
         if not (is_text(rel) or is_ps1(rel)):
             continue
@@ -290,8 +307,18 @@ def check_version(files):
                     bad += 1
                     report("FAIL", "f", "%s:%d version %s != VERSION %s"
                            % (rel, lineno, m.group(0), ver))
+            for m in VERSION_LABEL_RE.finditer(line):
+                if m.group(1) == "v":
+                    continue  # already counted by VERSION_RE above
+                label_hits += 1
+                found = "v" + m.group(2)
+                if found != ver:
+                    bad += 1
+                    report("FAIL", "f", "%s:%d unprefixed version label %s != VERSION %s"
+                           % (rel, lineno, m.group(2), ver))
     if not bad:
-        report("PASS", "f", "%d version mentions match VERSION=%s" % (hits, ver))
+        report("PASS", "f", "%d version mentions (+%d label-only) match VERSION=%s"
+               % (hits, label_hits, ver))
     return bad
 
 
@@ -366,13 +393,18 @@ def check_bash_syntax():
 
 
 # ---------------------------------------------------------------- (i) workflows
+def load_yaml_module():
+    try:
+        import yaml  # type: ignore
+        return yaml
+    except Exception:
+        return None
+
+
 def check_workflows(files):
     bad = 0
     checked = 0
-    try:
-        import yaml  # type: ignore
-    except Exception:
-        yaml = None
+    yaml = load_yaml_module()
     for rel in files:
         if not rel.startswith(".github/workflows/"):
             continue
@@ -424,9 +456,178 @@ def check_md_tables(files):
     return bad
 
 
+# ---------------------------------------------------------------- (k) manifest
+MANIFEST_LINE_RE = re.compile(r"^([0-9a-f]{64})  (\S.*)$")
+
+
+def git_file_list():
+    """Tracked + untracked-but-not-ignored files via git; None when git is unusable."""
+    git = shutil.which("git")
+    if not git or not os.path.isdir(os.path.join(ROOT, ".git")):
+        return None
+    names = set()
+    for args in (["ls-files", "-z"],
+                 ["ls-files", "-z", "--others", "--exclude-standard"]):
+        try:
+            p = subprocess.run([git] + args, cwd=ROOT, capture_output=True, timeout=60)
+        except Exception:
+            return None
+        if p.returncode != 0:
+            return None
+        for raw in p.stdout.split(b"\0"):
+            if raw:
+                names.add(raw.decode("utf-8", errors="replace").replace("\\", "/"))
+    return names
+
+
+def manifest_files():
+    names = git_file_list()
+    if names is None:
+        names = set(collect_files())
+    out = []
+    for rel in sorted(names):
+        if rel == MANIFEST_REL or rel.startswith(".git/") or "/__pycache__/" in rel:
+            continue
+        if os.path.isfile(os.path.join(ROOT, rel)):
+            out.append(rel)
+    return out
+
+
+def manifest_digest(rel):
+    data = read_bytes(rel)
+    if is_text(rel) or is_ps1(rel):
+        data = data.replace(b"\r\n", b"\n")
+    return hashlib.sha256(data).hexdigest()
+
+
+def write_manifest():
+    lines = ["%s  %s" % (manifest_digest(rel), rel) for rel in manifest_files()]
+    path = os.path.join(ROOT, MANIFEST_REL)
+    tmp = "%s.tmp-%d" % (path, os.getpid())
+    with open(tmp, "wb") as fh:
+        fh.write(("\n".join(lines) + "\n").encode("utf-8"))
+    os.replace(tmp, path)
+    print("verify_repo: wrote %s (%d entries, EOL-normalized sha256)" % (MANIFEST_REL, len(lines)))
+    return len(lines)
+
+
+def check_manifest():
+    if not os.path.isfile(os.path.join(ROOT, MANIFEST_REL)):
+        report("FAIL", "k", "%s missing (run: python3 scripts/verify_repo.py --update-manifest)"
+               % MANIFEST_REL)
+        return 1
+    bad = 0
+    listed = {}
+    for lineno, line in enumerate(read_text(MANIFEST_REL).split("\n"), 1):
+        if not line.strip():
+            continue
+        m = MANIFEST_LINE_RE.match(line)
+        if not m:
+            bad += 1
+            report("FAIL", "k", "%s:%d malformed line (expected '<sha256>  <path>')"
+                   % (MANIFEST_REL, lineno))
+            continue
+        if m.group(2) in listed:
+            bad += 1
+            report("FAIL", "k", "%s:%d duplicate entry %s" % (MANIFEST_REL, lineno, m.group(2)))
+        listed[m.group(2)] = m.group(1)
+    expected = dict((rel, manifest_digest(rel)) for rel in manifest_files())
+    for rel in sorted(listed):
+        if rel not in expected:
+            bad += 1
+            report("FAIL", "k", "%s listed in manifest but absent from the tree" % rel)
+        elif listed[rel] != expected[rel]:
+            bad += 1
+            report("FAIL", "k", "%s sha256 mismatch (manifest %s.. != tree %s..)"
+                   % (rel, listed[rel][:12], expected[rel][:12]))
+    for rel in sorted(expected):
+        if rel not in listed:
+            bad += 1
+            report("FAIL", "k", "%s present in tree but not listed in %s" % (rel, MANIFEST_REL))
+    if bad:
+        report("FAIL", "k", "manifest drift: re-run with --update-manifest after reviewing the diff")
+    else:
+        report("PASS", "k", "%s verifies %d files (EOL-normalized sha256)"
+               % (MANIFEST_REL, len(expected)))
+    return bad
+
+
+# ---------------------------------------------------------------- (l) issue templates
+ISSUE_FORM_TYPES = ("markdown", "textarea", "input", "dropdown", "checkboxes")
+
+
+def check_issue_templates(files):
+    bad = 0
+    checked = 0
+    yaml = load_yaml_module()
+    for rel in files:
+        if not rel.startswith(".github/ISSUE_TEMPLATE/"):
+            continue
+        if not rel.lower().endswith((".yml", ".yaml")):
+            continue
+        checked += 1
+        text = read_text(rel)
+        base = os.path.basename(rel)
+        if "\t" in text:
+            bad += 1
+            report("FAIL", "l", "%s contains tab characters" % rel)
+        if base == "config.yml":
+            if not re.search(r"^blank_issues_enabled:", text, re.M):
+                bad += 1
+                report("FAIL", "l", "%s missing top-level 'blank_issues_enabled:'" % rel)
+        else:
+            for key in ("name", "description", "body"):
+                if not re.search(r"^%s:" % key, text, re.M):
+                    bad += 1
+                    report("FAIL", "l", "%s missing top-level '%s:'" % (rel, key))
+            if not re.search(r"^\s+-\s+type:\s*(%s)\b" % "|".join(ISSUE_FORM_TYPES), text, re.M):
+                bad += 1
+                report("FAIL", "l", "%s has no issue-form element under body" % rel)
+        if yaml is not None:
+            try:
+                doc = yaml.safe_load(text)
+                if not isinstance(doc, dict):
+                    bad += 1
+                    report("FAIL", "l", "%s does not parse to a mapping" % rel)
+                elif base != "config.yml" and not isinstance(doc.get("body"), list):
+                    bad += 1
+                    report("FAIL", "l", "%s 'body' is not a list" % rel)
+            except Exception as exc:
+                bad += 1
+                report("FAIL", "l", "%s YAML parse error: %s" % (rel, str(exc).replace("\n", " ")))
+    pr_tpl = ".github/PULL_REQUEST_TEMPLATE.md"
+    has_pr = os.path.isfile(os.path.join(ROOT, pr_tpl))
+    if checked == 0:
+        report("SKIP", "l", "no issue templates under .github/ISSUE_TEMPLATE")
+        return 0
+    if not has_pr:
+        bad += 1
+        report("FAIL", "l", "%s missing" % pr_tpl)
+    if not bad:
+        extra = "PyYAML full parse" if yaml is not None else "structural checks only"
+        report("PASS", "l", "%d issue templates + PR template OK (%s)" % (checked, extra))
+    return bad
+
+
 # ---------------------------------------------------------------- main
-def main():
+USAGE = "usage: verify_repo.py [--update-manifest] [-h]"
+
+
+def main(argv):
+    update = False
+    for arg in argv:
+        if arg == "--update-manifest":
+            update = True
+        elif arg in ("-h", "--help"):
+            print(USAGE)
+            return 0
+        else:
+            print("verify_repo: unknown option %r" % arg)
+            print(USAGE)
+            return 2
     print("verify_repo: root=%s" % ROOT)
+    if update:
+        write_manifest()
     files = collect_files()
     print("verify_repo: %d files (excluding .git)" % len(files))
     fails = 0
@@ -440,6 +641,8 @@ def main():
     fails += check_bash_syntax()
     fails += check_workflows(files)
     fails += check_md_tables(files)
+    fails += check_manifest()
+    fails += check_issue_templates(files)
     n_pass = sum(1 for s, _, _ in RESULTS if s == "PASS")
     n_fail = sum(1 for s, _, _ in RESULTS if s == "FAIL")
     n_skip = sum(1 for s, _, _ in RESULTS if s == "SKIP")
@@ -448,4 +651,4 @@ def main():
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(main(sys.argv[1:]))

@@ -71,7 +71,7 @@ path, mode, skill_path = sys.argv[1], sys.argv[2], sys.argv[3]
 start = "<!-- LOCK360_START -->"
 end = "<!-- LOCK360_END -->"
 snippet = """<!-- LOCK360_START -->
-## 🔒 بروتوكول التقفيل الشامل 360° (Lock360 v2.5)
+## 🔒 بروتوكول التقفيل الشامل 360° (Lock360 v2.6)
 
 - **المصدر الموحد:** `00-lock360-zero-gaps` (`__LOCK360_SKILL_PATH__` · `gist/01-CORE-PROMPT-360-v2.md` · `workflows/00-lock360-zero-gaps.md`).
 - **`L1 Auto-Guard` (`P` تلقائياً بعد الأعمال غير التافهة):** راجع المتبقي/الحدود، أمان التسليم والتزامن، الدليل القاطع بعد آخر تعديل، واسأل المستخدم عن أي غموض بدل التخمين.
@@ -192,7 +192,9 @@ install_pack() {
     done
   fi
 
-  [ "$bak_used" -eq 1 ] && echo "[lock360] Backed up existing pack targets to: $bak_root"
+  if [ "$bak_used" -eq 1 ]; then
+    echo "[lock360] Backed up existing pack targets to: $bak_root"
+  fi
   echo "[lock360] Installed skills-pack: skills=${sc} workflows=${wc} rules=${rc}"
 
   if [ "$WITH_RULE" -eq 1 ] && [ -f "${PACK_ROOT}/GEMINI.template.md" ]; then
@@ -259,7 +261,10 @@ uninstall_pack() {
     done
   fi
 
-  [ "$bak_used" -eq 1 ] && echo "[lock360] Backed up and removed skills-pack targets (backup: $bak_root)"
+  if [ "$bak_used" -eq 1 ]; then
+    echo "[lock360] Backed up and removed skills-pack targets (backup: $bak_root)"
+  fi
+  return 0
 }
 
 if [ "$UNINSTALL" -eq 1 ]; then
@@ -272,7 +277,9 @@ if [ "$UNINSTALL" -eq 1 ]; then
     rm -rf "$SKILL_DST"
   fi
   rm -f "$WF_DST"
-  [ "$WITH_PACK" -eq 1 ] && uninstall_pack
+  if [ "$WITH_PACK" -eq 1 ]; then
+    uninstall_pack
+  fi
   update_gemini_block "remove"
   echo "[lock360] Uninstalled cleanly from: $TARGET_ROOT"
   exit 0
