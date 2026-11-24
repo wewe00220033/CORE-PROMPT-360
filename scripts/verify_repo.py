@@ -195,14 +195,19 @@ def core_forbidden_patterns():
 
 SIBLING_SKILLS = [
     "00-reverse-engineer", "00-bolla-constitution", "00-architect-sre",
+    "00-architectural-cards-protocol", "00-dual-agent-copilot",
     "01-micro-tasker", "02-planning-system", "00-evidence-inspector",
-    "egm-review", "everything-search",
+    "egm-bootstrap", "egm-brainstorm", "egm-draft", "egm-drift-report",
+    "egm-resolve", "egm-review", "egm-review-loop", "everything-search",
+    "neon-ai-gateway", "neon-auth", "neon-functions", "neon-object-storage",
+    "neon-postgres", "neon-realtime",
 ]
 SIBLING_WHITELIST = (
     "SKILL.md",
     "workflows/00-lock360-zero-gaps.md",
     "skills-pack/README.md",
     ".github/workflows/verify.yml",
+    "references/COMPLETE_SKILLS_CATALOG.md",
 )
 
 
@@ -625,7 +630,13 @@ def check_lock360_engine():
         return 0
     bad = 0
     oks = []
-    for args, label in ((["--selftest"], "selftest"), (["eval"], "eval")):
+    runs = (
+        (["--selftest"], "selftest"),
+        (["eval"], "eval"),
+        (["audit-skill", ".", "--strict"], "audit-skill core"),
+        (["audit-skill", "skills-pack/skills"], "audit-skill pack"),
+    )
+    for args, label in runs:
         try:
             p = subprocess.run([sys.executable, "-X", "utf8", path] + args, cwd=ROOT,
                                capture_output=True, text=True, encoding="utf-8",
@@ -636,8 +647,9 @@ def check_lock360_engine():
             continue
         summary = ""
         for line in (p.stdout or "").strip().split("\n")[::-1]:
-            if line.startswith("lock360 "):
-                summary = line.strip()
+            if "lock360 " in line and (line.startswith("lock360 ") or "audit-skill" in line):
+                summary = line.strip().split("\u2014")[-1].strip() if "audit-skill" in line else line.strip()
+                summary = ("%s: %s" % (label, summary)) if "audit-skill" in line else summary
                 break
         if p.returncode != 0:
             bad += 1

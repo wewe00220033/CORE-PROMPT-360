@@ -25,6 +25,11 @@ jobs:
           python3 scripts/lock360.py --selftest
           python3 scripts/lock360.py eval
 
+      - name: Skill supply-chain audit (core strict + pack)
+        run: |
+          python3 scripts/lock360.py audit-skill . --strict
+          python3 scripts/lock360.py audit-skill skills-pack/skills
+
       - name: OpenCode round-trip (bash)
         run: |
           set -euo pipefail
@@ -127,6 +132,14 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw "lock360 selftest failed" }
           python -X utf8 scripts\lock360.py eval
           if ($LASTEXITCODE -ne 0) { throw "lock360 eval failed" }
+
+      - name: Skill supply-chain audit (core strict + pack, Windows)
+        run: |
+          $ErrorActionPreference = "Stop"
+          python -X utf8 scripts\lock360.py audit-skill . --strict
+          if ($LASTEXITCODE -ne 0) { throw "lock360 audit-skill core failed" }
+          python -X utf8 scripts\lock360.py audit-skill skills-pack\skills
+          if ($LASTEXITCODE -ne 0) { throw "lock360 audit-skill pack failed" }
 
       - name: OpenCode round-trip (Windows PowerShell 5.1)
         run: |

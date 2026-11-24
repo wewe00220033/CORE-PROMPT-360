@@ -174,6 +174,27 @@
      "expect": {"verdict": "FAIL", "must_include": ["A-SECRET"]}},
 
     {"id": "S-01", "kind": "sync", "expect": {"ok": true}},
-    {"id": "S-02", "kind": "skill_size", "expect": {"max_lines": 115}}
+    {"id": "S-02", "kind": "skill_size", "expect": {"max_lines": 115}},
+
+    {"id": "SA-01", "kind": "skill_audit", "skill_path": ".",
+     "expect": {"verdict": "PASS", "findings": []}},
+    {"id": "SA-02", "kind": "skill_audit",
+     "skill_md_inline": "---\nname: demo\n---\n# demo\n\nلا تستخدم هذه المهارة خارج نطاقها.\n",
+     "expect": {"verdict": "FAIL", "must_include": ["SA-FRONTMATTER"]}},
+    {"id": "SA-03", "kind": "skill_audit",
+     "skill_md_inline": "---\nname: demo\ndescription: demo skill\n---\n# demo\n\nلا تستخدم هذه المهارة خارج نطاقها.\n",
+     "extra_files": {"scripts/setup.sh": "#!/usr/bin/env bash\n@@FAKE_PIPE@@\n"},
+     "expect": {"verdict": "FAIL", "must_include": ["SA-EXEC-PIPE"], "must_not_include": ["SA-FRONTMATTER"]}},
+    {"id": "SA-04", "kind": "skill_audit",
+     "skill_md_inline": "---\nname: demo\ndescription: demo skill\n---\n# demo\n\nلا تستخدم هذه المهارة خارج نطاقها.\n",
+     "extra_files": {"config.env": "TOKEN=@@FAKE_GHP@@\n"},
+     "expect": {"verdict": "FAIL", "must_include": ["SA-SECRET"], "must_not_include": ["SA-EXEC-PIPE"]}},
+    {"id": "SA-05", "kind": "skill_audit",
+     "skill_md_inline": "---\nname: demo\ndescription: demo skill\n---\n# demo\n\nلا تستخدم هذه المهارة خارج نطاقها.\n",
+     "extra_files": {"notes.md": "plain text \u202e txet nialp\n"},
+     "expect": {"verdict": "FAIL", "must_include": ["SA-TROJAN-BIDI"], "must_not_include": ["SA-SECRET", "SA-EXEC-PIPE"]}},
+    {"id": "SA-06", "kind": "skill_audit",
+     "skill_md_inline": "---\nname: demo\ndescription: مهارة تجريبية\n---\n# مهارة تجريبية\n\nلا تستخدم هذه المهارة خارج نطاقها.\n\n| a | b |\n|---|---|\n\nراجع [الملف](./nope.md).\n",
+     "expect": {"verdict": "WARN", "must_include": ["SA-RTL-TABLE", "SA-LINKS"], "must_not_include": ["SA-OVERTRIGGER", "SA-FRONTMATTER", "SA-SIZE"]}}
   ]
 }

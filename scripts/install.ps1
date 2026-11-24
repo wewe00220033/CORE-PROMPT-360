@@ -90,7 +90,7 @@ function Get-SnippetSkillPath([string]$Root, [string]$DefaultRoot, [string]$Port
 
 function Build-Snippet([string]$SkillPath) {
     # Literal lines are Unescape'd FIRST; the runtime skill path is concatenated AFTER (never passed through Unescape).
-    $head = [regex]::Unescape("## \uD83D\uDD12 \u0628\u0631\u0648\u062A\u0648\u0643\u0648\u0644 \u0627\u0644\u062A\u0642\u0641\u064A\u0644 \u0627\u0644\u0634\u0627\u0645\u0644 360\u00B0 (Lock360 v2.7)")
+    $head = [regex]::Unescape("## \uD83D\uDD12 \u0628\u0631\u0648\u062A\u0648\u0643\u0648\u0644 \u0627\u0644\u062A\u0642\u0641\u064A\u0644 \u0627\u0644\u0634\u0627\u0645\u0644 360\u00B0 (Lock360 v2.8)")
     $srcA = [regex]::Unescape("- **\u0627\u0644\u0645\u0635\u062F\u0631 \u0627\u0644\u0645\u0648\u062D\u062F:** ``00-lock360-zero-gaps`` (``")
     $srcB = [regex]::Unescape("`` \u00B7 ``gist/01-CORE-PROMPT-360-v2.md`` \u00B7 ``workflows/00-lock360-zero-gaps.md``).")
     $tail = @(

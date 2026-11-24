@@ -29,7 +29,7 @@ body:
     attributes:
       label: "Version / الإصدار"
       description: "Content of the VERSION file or the raw tag you used. محتوى ملف VERSION أو الوسم المستخدم في الرابط."
-      placeholder: "v2.7"
+      placeholder: "v2.8"
     validations:
       required: true
   - type: textarea

@@ -1,4 +1,4 @@
-# 🗺️ خريطة تغطية جميع الحالات — All-Cases Coverage Map (`v2.7`)
+# 🗺️ خريطة تغطية جميع الحالات — All-Cases Coverage Map (`v2.8`)
 
 > **الغرض:** أي حالة تقابلك ⬅ أي ترس وأي عدسة وأي دليل وأي بوابة إغلاق. القرار الحتمي بنفس القواعد: `python3 scripts/lock360.py route --text "<الطلب>"` (يعطي `gear / level / tone / lenses / required_stages`).
 > **قاعدة الصدق:** هذه الخريطة ترفع التغطية والتحقق لكنها **لا تدّعي كمالاً مطلقاً** خارج نطاق المعطيات والأدلة المتاحة. أي `❓ مجهول` جوهري يُسأل عنه المستخدم.
@@ -85,3 +85,4 @@
 - القوالب: [`./LOCK360_TEMPLATES.md`](./LOCK360_TEMPLATES.md) · النملة والدبانة: [`./ANT_AND_FLY_TRAPS.md`](./ANT_AND_FLY_TRAPS.md) · اللهجة: [`./TONE_GLOSSARY.md`](./TONE_GLOSSARY.md)
 - المصفوفات التقنية: [`./DOMAIN_MATRICES.md`](./DOMAIN_MATRICES.md) · بنك التصيّد وسطح التهديد: [`./ADVERSARIAL_CHECKLIST_360.md`](./ADVERSARIAL_CHECKLIST_360.md) · السلامة: [`./THREAT_MODEL_AND_SAFETY.md`](./THREAT_MODEL_AND_SAFETY.md)
 - التقييم: [`./EVAL_AND_GUARDRAILS.md`](./EVAL_AND_GUARDRAILS.md) · المصادر: [`./SOURCES_AND_INSPIRATIONS.md`](./SOURCES_AND_INSPIRATIONS.md) · الموديلات الضعيفة: [`../prompts/WEAK-MODEL-BOOSTER.md`](../prompts/WEAK-MODEL-BOOSTER.md)
+- **حالة "أثبّت مهارة أو أراجع مهارة خارجية" (سلسلة التوريد):** `python3 scripts/lock360.py audit-skill <المسار> [--strict]` ثم [`./SKILL_AUDIT_CHECKLIST.md`](./SKILL_AUDIT_CHECKLIST.md) · حالة "أي مهارة أستخدم لهذا الطلب؟": [`./COMPLETE_SKILLS_CATALOG.md`](./COMPLETE_SKILLS_CATALOG.md)

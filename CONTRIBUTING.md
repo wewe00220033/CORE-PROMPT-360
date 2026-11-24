@@ -1,6 +1,6 @@
 <div dir="rtl">
 
-# 🤝 دليل المساهمة في CORE-PROMPT-360 (`Lock360 v2.7`)
+# 🤝 دليل المساهمة في CORE-PROMPT-360 (`Lock360 v2.8`)
 
 > أهلاً بك. هذا المستودع هو **نواة برومبت محمولة + Skill** تُنسخ كما هي في أي أداة ذكاء اصطناعي، لذلك أي مساهمة لازم تحافظ على ثلاث خصائص: **مكتفية بذاتها** · **`RTL-Safe`** · **صفر أسرار أو مسارات شخصية**. كل ما تحتاجه لتمرير مساهمتك موجود في هذه الصفحة.
 
@@ -92,7 +92,7 @@ powershell -ExecutionPolicy Bypass -File scripts\install.ps1 -Uninstall -TargetR
 - **(j)** صفر صفوف جداول Markdown خارج `skills-pack/`.
 - **(k)** مطابقة `MANIFEST.sha256` لكل الملفات المتتبعة. البصمات تُحسب على بايتات موحّدة النهايات (`CRLF ⬅ LF`) للملفات النصية و`*.ps1`، فتتطابق 100% بين Windows وLinux/macOS رغم `eol=crlf` في `.gitattributes`.
 - **(l)** صحة قوالب `.github/ISSUE_TEMPLATE/*.yml` هيكلياً (لا `tabs`، ووجود `name:` و`description:` و`body:` وعنصر نموذج واحد على الأقل لغير `config.yml`) + وجود `PULL_REQUEST_TEMPLATE.md`.
-- **(m)** المحرك الحتمي: يشغّل `scripts/lock360.py --selftest` ثم `scripts/lock360.py eval` ويطلب خروج `0` لكليهما (اختبارات `tests/eval_cases.json` كلها أحمر-أخضر).
+- **(m)** المحرك الحتمي: يشغّل `scripts/lock360.py --selftest` ثم `eval` ثم `audit-skill . --strict` ثم `audit-skill skills-pack/skills` ويطلب خروج `0` للأربعة (اختبارات `tests/eval_cases.json` كلها أحمر-أخضر + صفر `FAIL` في تدقيق سلسلة توريد المهارات).
 - **استثناء مقصود:** `tests/fixtures/*.txt` معفاة من `(f)` و`(g)` و`(j)` فقط لأنها تحوي عمداً جداول وخانات متروكة وإصدارات قديمة كطفرات اختبار؛ تبقى خاضعة لـ `(a)` و`(b)` و`(d)`.
 
 ---
@@ -104,12 +104,13 @@ powershell -ExecutionPolicy Bypass -File scripts\install.ps1 -Uninstall -TargetR
 - **كلمة مفتاحية جديدة:** تُضاف في `SKILL.md` (سطر `تفعيل صريح` أو `إشارات خفيفة`) **و** في `TRIGGERS_EXPLICIT` / `TRIGGERS_LIGHT` داخل المحرك معاً — حالة `sync` تفشل لو اختلفا.
 - **أنماط الأسرار في الاختبارات:** لا تكتب نمط سر حرفياً؛ استخدم العناصر النائبة `@@FAKE_SK@@` / `@@FAKE_GHP@@` / `@@FAKE_BEARER@@` التي يجمعها المحرك وقت التشغيل.
 - **سقف `SKILL.md`:** 115 سطراً (حالة `skill_size`)؛ أي تفصيل إضافي يذهب إلى `references/`.
+- **إضافة أو تعديل مهارة في `skills-pack/`:** شغّل `python3 scripts/lock360.py audit-skill skills-pack/skills/<المهارة>` — أي `SA-*` بدرجة `FAIL` يُرفض، و`WARN` يُدوَّن في بطاقة [`references/SKILL_AUDIT_CHECKLIST.md`](./references/SKILL_AUDIT_CHECKLIST.md) مع إكمال النقاط البشرية فيها، ثم أضف المهارة إلى [`references/COMPLETE_SKILLS_CATALOG.md`](./references/COMPLETE_SKILLS_CATALOG.md) وإلى `SIBLING_SKILLS` في `verify_repo.py`. فحوص `SA-*` منفصلة عن كتالوج المخرجات (`CHECKS` تبقى 36)؛ حالاتها في `tests/eval_cases.json` بنوع `skill_audit` (`skill_path` أو `skill_md_inline` + `extra_files`).
 
 ---
 
 ## 🔗 ثبات روابط `raw` والتوافق بين الإصدارات
 
-- الروابط المثبّتة على وسم إصدار (`.../CORE-PROMPT-360/v2.7/gist/...`) أو على `commit` محدد **لا تتغير أبداً**؛ الروابط المثبّتة على فرع (`/main/`) تتحرك مع كل دفع. للأتمتة أو الاستخدام طويل الأمد اعتمد الوسم دائماً.
+- الروابط المثبّتة على وسم إصدار (`.../CORE-PROMPT-360/v2.8/gist/...`) أو على `commit` محدد **لا تتغير أبداً**؛ الروابط المثبّتة على فرع (`/main/`) تتحرك مع كل دفع. للأتمتة أو الاستخدام طويل الأمد اعتمد الوسم دائماً.
 - عند ترقية الإصدار: حدّث `VERSION` + العنوان وسطر `الإصدار` في `gist/01-CORE-PROMPT-360-v2.md` + `SKILL.md` + كل روابط `raw` المثبّتة في `README.md` و`prompts/QUICK-START.md` و`platforms/` معاً، وأضف قسماً جديداً في `gist/04-CHANGELOG.md`. الفاحص `(f)` يرفض أي تضارب.
 - احتفظ بالملفات الخمسة في `gist/` بنفس أسمائها ASCII لتبقى الروابط القديمة صالحة.
 
