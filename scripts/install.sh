@@ -91,9 +91,9 @@ path, mode, skill_path = sys.argv[1], sys.argv[2], sys.argv[3]
 start = "<!-- LOCK360_START -->"
 end = "<!-- LOCK360_END -->"
 snippet = """<!-- LOCK360_START -->
-## 🔒 بروتوكول التقفيل الشامل 360° (Lock360 v2.9)
+## 🔒 بروتوكول التقفيل الشامل 360° (Lock360 v3.0)
 
-- **المصدر الموحد:** `00-lock360-zero-gaps` (`__LOCK360_SKILL_PATH__` · `gist/01-CORE-PROMPT-360-v2.md` · `workflows/00-lock360-zero-gaps.md`).
+- **المصدر الموحد:** `00-lock360-zero-gaps` (`__LOCK360_SKILL_PATH__` · `gist/01-CORE-PROMPT-360-v3.md` · `workflows/00-lock360-zero-gaps.md`).
 - **`L1 Auto-Guard` (`P` تلقائياً بعد الأعمال غير التافهة):** راجع المتبقي/الحدود، أمان التسليم والتزامن، الدليل القاطع بعد آخر تعديل، واسأل المستخدم عن أي غموض بدل التخمين.
 - **`L2 / L3`:** عند طلب قفّل 360 / بالضبة والمفتاح / 1600°-10000° / `/lock360` حمّل المهارة ونفّذ الترس المناسب (`S / M / L`)، ومرّر المخرج على `scripts/lock360.py audit` قبل الإغلاق، مع الالتزام بقاعدة `RTL-Safe` (بلا جداول `| col |` في الشات).
 <!-- LOCK360_END -->"""

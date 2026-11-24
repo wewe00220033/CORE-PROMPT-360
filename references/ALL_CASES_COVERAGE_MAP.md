@@ -1,4 +1,4 @@
-# 🗺️ خريطة تغطية جميع الحالات — All-Cases Coverage Map (`v2.9`)
+# 🗺️ خريطة تغطية جميع الحالات — All-Cases Coverage Map (`v3.0`)
 
 > **الغرض:** أي حالة تقابلك ⬅ أي ترس وأي عدسة وأي دليل وأي بوابة إغلاق. القرار الحتمي بنفس القواعد: `python3 scripts/lock360.py route --text "<الطلب>"` (يعطي `gear / level / tone / lenses / required_stages`).
 > **قاعدة الصدق:** هذه الخريطة ترفع التغطية والتحقق لكنها **لا تدّعي كمالاً مطلقاً** خارج نطاق المعطيات والأدلة المتاحة. أي `❓ مجهول` جوهري يُسأل عنه المستخدم.
@@ -11,7 +11,7 @@
 - **تعديل صغير آمن (سطر / ملف واحد):** لا شيء، أو `L1/P` فقط لو لمس منطقة حساسة؛ تحقق بعد آخر تعديل.
 - **ميزة / إصلاح متعدد الملفات:** `L2/M` + عدسة البرمجة + نطاق الأثر + مسار سليم ومسارات سلبية + `audit` قبل الإغلاق.
 - **تزامن / جلسات / ملفات / شبكة / أمن / بيانات:** `L3/L` + `DOMAIN_MATRICES.md` + `ADVERSARIAL_CHECKLIST_360.md` + بطاقات `FMEA` بأولوية `AP` + `Rollback`.
-- **نشر / ترحيل / حذف / صلاحيات:** `L3/L` إلزامي (`route` يرفع تلقائياً على كلمات الإنتاج والحذف) + زر طوارئ + نسخة احتياطية مؤكدة بالبصمة + رجوع في أقل من دقيقة.
+- **نشر / ترحيل / حذف / صلاحيات:** `L3/L` إلزامي (`route` يرفع تلقائياً على كلمات الإنتاج والحذف) + `deploy-gate` (`DG-01..07` في [`RELEASE_DEPLOY_ROLLBACK.md`](./RELEASE_DEPLOY_ROLLBACK.md)) + زر طوارئ + نسخة احتياطية مؤكدة بالبصمة + رجوع سريع.
 - **تصحيح خلل:** جذر السبب قبل أي إصلاح؛ **3 إصلاحات فاشلة = توقف وأعد فحص النمط المعماري** (عدسة البرمجة).
 
 ### ب. قرارات شخصية / عائلية / علاقات (لهجة بشرية)
@@ -61,10 +61,10 @@
 - [ ] نطاق الأثر: القائم المحمي محدد.
 - [ ] الانتقالات والشروط الكامنة مقفولة.
 - [ ] الدليل: Ground Truth بعد آخر تعديل / قرار.
-- [ ] المخاطر: أهم الثغرات لها قفل + فدية + Tripwire + AP.
+- [ ] المخاطر: أهم الثغرات لها قفل + خطة تعويض بديلة + Tripwire + AP.
 - [ ] الرجوع: زر الطوارئ ومسار الرجوع واضحان.
-- [ ] المجهول: الأسئلة الجوهرية مطروحة، ولا تخمين حاسم.
-- [ ] مصيدة النمل وشبكة الدبان فارغتان أو كل ما فيهما مُعلَن في 3.14 (audit).
+- [ ] المجهول: الأسئلة الجوهرية مطروحة في Q-Contract (`HOLD/GO`)، ولا تخمين حاسم.
+- [ ] الفحص الهيكلي وكشف الانحراف نظيفان أو كل 🟠 معلَن في 3.14 (`audit`)، مع نقد 3.15 وخلاصة 3.16.
 - [ ] الصياغة: أقصى تحقق ممكن ضمن النطاق والأدلة المتاحة — لا كمال مطلق.
 ```
 
@@ -81,8 +81,8 @@
 
 ## 4) روابط مرجعية سريعة
 
-- النواة: [`../gist/01-CORE-PROMPT-360-v2.md`](../gist/01-CORE-PROMPT-360-v2.md) · العدسات: [`../gist/02-LENSES.md`](../gist/02-LENSES.md) · الأمثلة: [`../gist/03-EXAMPLES.md`](../gist/03-EXAMPLES.md)
-- القوالب: [`./LOCK360_TEMPLATES.md`](./LOCK360_TEMPLATES.md) · النملة والدبانة: [`./ANT_AND_FLY_TRAPS.md`](./ANT_AND_FLY_TRAPS.md) · اللهجة: [`./TONE_GLOSSARY.md`](./TONE_GLOSSARY.md)
+- النواة: [`../gist/01-CORE-PROMPT-360-v3.md`](../gist/01-CORE-PROMPT-360-v3.md) · العدسات: [`../gist/02-LENSES.md`](../gist/02-LENSES.md) · الأمثلة: [`../gist/03-EXAMPLES.md`](../gist/03-EXAMPLES.md)
+- القوالب: [`./LOCK360_TEMPLATES.md`](./LOCK360_TEMPLATES.md) · الكتالوج: [`./ANT_AND_FLY_TRAPS.md`](./ANT_AND_FLY_TRAPS.md) · اللهجة: [`./TONE_GLOSSARY.md`](./TONE_GLOSSARY.md) · النشر: [`./RELEASE_DEPLOY_ROLLBACK.md`](./RELEASE_DEPLOY_ROLLBACK.md)
 - المصفوفات التقنية: [`./DOMAIN_MATRICES.md`](./DOMAIN_MATRICES.md) · بنك التصيّد وسطح التهديد: [`./ADVERSARIAL_CHECKLIST_360.md`](./ADVERSARIAL_CHECKLIST_360.md) · السلامة: [`./THREAT_MODEL_AND_SAFETY.md`](./THREAT_MODEL_AND_SAFETY.md)
 - التقييم: [`./EVAL_AND_GUARDRAILS.md`](./EVAL_AND_GUARDRAILS.md) · المصادر: [`./SOURCES_AND_INSPIRATIONS.md`](./SOURCES_AND_INSPIRATIONS.md) · الموديلات الضعيفة: [`../prompts/WEAK-MODEL-BOOSTER.md`](../prompts/WEAK-MODEL-BOOSTER.md)
 - **حالة "أثبّت مهارة أو أراجع مهارة خارجية" (سلسلة التوريد):** `python3 scripts/lock360.py audit-skill <المسار> [--strict]` ثم [`./SKILL_AUDIT_CHECKLIST.md`](./SKILL_AUDIT_CHECKLIST.md) · حالة "أي مهارة أستخدم لهذا الطلب؟": [`./COMPLETE_SKILLS_CATALOG.md`](./COMPLETE_SKILLS_CATALOG.md)

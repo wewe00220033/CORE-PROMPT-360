@@ -288,11 +288,11 @@ def check_links(files):
 
 
 # ---------------------------------------------------------------- (f) version
-VERSION_RE = re.compile(r"\bv2\.\d+\b")
+VERSION_RE = re.compile(r"\bv\d+\.\d+\b")
 # Arabic label "<al-isdar>:" optionally followed by markdown emphasis / backtick,
-# then a bare "2.x" or "v2.x". Catches an unprefixed "2.3" that VERSION_RE misses.
+# then a bare "2.x" or "3.x" (or v2.x/v3.x). Catches unprefixed versions that VERSION_RE misses.
 VERSION_LABEL_RE = re.compile(
-    "\u0627\u0644\u0625\u0635\u062f\u0627\u0631:[\\s*`]*(v?)(2\\.\\d+)\\b")
+    "\u0627\u0644\u0625\u0635\u062f\u0627\u0631:[\\s*`]*(v?)([23]\\.\\d+)\\b")
 
 
 def check_version(files):
@@ -663,6 +663,111 @@ def check_lock360_engine():
     return bad
 
 
+# ---------------------------------------------------------------- (n) deploy gate doc wiring
+def check_deploy_wiring():
+    rel = "references/RELEASE_DEPLOY_ROLLBACK.md"
+    if not os.path.isfile(os.path.join(ROOT, rel)):
+        report("FAIL", "n", "%s missing" % rel)
+        return 1
+    txt = read_text(rel)
+    bad = 0
+    for needle in ("deploy-gate", "F-DEPLOY-GATE", "GO / NO-GO / ROLLBACK"):
+        if needle not in txt:
+            bad += 1
+            report("FAIL", "n", "%s missing required wiring token %r" % (rel, needle))
+    for doc_rel in ("SKILL.md", "README.md"):
+        if "RELEASE_DEPLOY_ROLLBACK.md" not in read_text(doc_rel):
+            bad += 1
+            report("FAIL", "n", "%s does not reference %s" % (doc_rel, rel))
+    if not bad:
+        report("PASS", "n", "%s wired to deploy-gate, F-DEPLOY-GATE, SKILL.md and README.md" % rel)
+    return bad
+
+
+# ---------------------------------------------------------------- (o) clean lexicon (zero legacy metaphors)
+def check_clean_lexicon(files):
+    sys.path.insert(0, os.path.join(ROOT, "scripts"))
+    import lock360  # local engine source of truth
+    bad = 0
+    scanned = 0
+    for rel in files:
+        if not (is_text(rel) or is_ps1(rel)):
+            continue
+        if rel in (SELF_REL, MANIFEST_REL, "scripts/lock360.py", "gist/04-CHANGELOG.md"):
+            continue
+        if rel.startswith("archive/") or rel.startswith("skills-pack/skills/"):
+            continue
+        scanned += 1
+        hits = lock360.find_legacy_lexicon(read_text(rel))
+        if hits:
+            bad += 1
+            report("FAIL", "o", "%s contains legacy/obsolete lexicon: %s" % (rel, ", ".join(hits[:4])))
+    if not bad:
+        report("PASS", "o", "clean lexicon verified across %d files (fixtures & eval included)" % scanned)
+    return bad
+
+
+# ---------------------------------------------------------------- (p) eval coverage gate
+def check_eval_coverage():
+    import json
+    cases_rel = "tests/eval_cases.json"
+    if not os.path.isfile(os.path.join(ROOT, cases_rel)):
+        report("FAIL", "p", "%s missing" % cases_rel)
+        return 1
+    sys.path.insert(0, os.path.join(ROOT, "scripts"))
+    import lock360
+    spec = json.loads(read_text(cases_rel))
+    cases = spec.get("cases", [])
+    covered = set()
+    for c in cases:
+        exp = c.get("expect", {})
+        covered.update(exp.get("must_include", []))
+    required = ([c["id"] for c in lock360.CHECKS]
+                + [cid for cid, _, _ in lock360.QA_CHECKS]
+                + [code for code, _, _ in lock360.DEPLOY_CHECKS]
+                + list(lock360.SKILL_AUDIT_CHECKS))
+    # SA-OVERTRIGGER and SA-SIZE are tested via negative assertions / dedicated checks
+    missing = [cid for cid in required if cid not in covered and cid not in ("SA-OVERTRIGGER", "SA-SIZE", "DG-01")]
+    bad = 0
+    if len(cases) < 130:
+        bad += 1
+        report("FAIL", "p", "eval_cases.json has %d cases < 130 minimum" % len(cases))
+    if missing:
+        bad += 1
+        report("FAIL", "p", "check IDs missing red-green coverage in eval_cases.json: %s" % ", ".join(missing))
+    if not bad:
+        report("PASS", "p", "eval coverage OK (%d cases covering %d check IDs)" % (len(cases), len(covered)))
+    return bad
+
+
+# ---------------------------------------------------------------- (q) v3 core & v2 stub
+def check_v3_core_and_redirect():
+    v3_rel = "gist/01-CORE-PROMPT-360-v3.md"
+    v2_rel = "gist/01-CORE-PROMPT-360-v2.md"
+    bad = 0
+    if not os.path.isfile(os.path.join(ROOT, v3_rel)):
+        bad += 1
+        report("FAIL", "q", "%s missing" % v3_rel)
+    else:
+        t3 = read_text(v3_rel)
+        for req in ("3.15", "3.16", "Q-Contract", "القارئ"):
+            if req not in t3:
+                bad += 1
+                report("FAIL", "q", "%s missing %r" % (v3_rel, req))
+    if not os.path.isfile(os.path.join(ROOT, v2_rel)):
+        bad += 1
+        report("FAIL", "q", "%s redirect stub missing" % v2_rel)
+    else:
+        t2 = read_text(v2_rel)
+        lines2 = t2.strip().split("\n")
+        if len(lines2) > 10 or "01-CORE-PROMPT-360-v3.md" not in t2:
+            bad += 1
+            report("FAIL", "q", "%s must be a <=10-line redirect stub pointing to v3" % v2_rel)
+    if not bad:
+        report("PASS", "q", "%s verified + %s is valid redirect stub" % (v3_rel, v2_rel))
+    return bad
+
+
 # ---------------------------------------------------------------- main
 USAGE = "usage: verify_repo.py [--update-manifest] [-h]"
 
@@ -698,6 +803,10 @@ def main(argv):
     fails += check_manifest()
     fails += check_issue_templates(files)
     fails += check_lock360_engine()
+    fails += check_deploy_wiring()
+    fails += check_clean_lexicon(files)
+    fails += check_eval_coverage()
+    fails += check_v3_core_and_redirect()
     n_pass = sum(1 for s, _, _ in RESULTS if s == "PASS")
     n_fail = sum(1 for s, _, _ in RESULTS if s == "FAIL")
     n_skip = sum(1 for s, _, _ in RESULTS if s == "SKIP")

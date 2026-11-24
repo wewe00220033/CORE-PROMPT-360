@@ -20,10 +20,12 @@ jobs:
       - name: Bash syntax check
         run: bash -n scripts/install.sh
 
-      - name: Lock360 engine (selftest + eval)
+      - name: Lock360 engine (selftest + eval + v3 gates)
         run: |
           python3 scripts/lock360.py --selftest
           python3 scripts/lock360.py eval
+          python3 scripts/lock360.py qa-audit --output tests/fixtures/qa_turn2_good.txt --prev tests/fixtures/qa_turn1_prev.txt --request tests/fixtures/request_turn2.txt
+          python3 scripts/lock360.py deploy-gate --output tests/fixtures/deploy_good.txt
 
       - name: Skill supply-chain audit (core strict + pack)
         run: |
@@ -125,13 +127,17 @@ jobs:
           python -X utf8 scripts\verify_repo.py
           if ($LASTEXITCODE -ne 0) { throw "verify_repo.py failed on Windows with $LASTEXITCODE" }
 
-      - name: Lock360 engine (selftest + eval, Windows)
+      - name: Lock360 engine (selftest + eval + v3 gates, Windows)
         run: |
           $ErrorActionPreference = "Stop"
           python -X utf8 scripts\lock360.py --selftest
           if ($LASTEXITCODE -ne 0) { throw "lock360 selftest failed" }
           python -X utf8 scripts\lock360.py eval
           if ($LASTEXITCODE -ne 0) { throw "lock360 eval failed" }
+          python -X utf8 scripts\lock360.py qa-audit --output tests\fixtures\qa_turn2_good.txt --prev tests\fixtures\qa_turn1_prev.txt --request tests\fixtures\request_turn2.txt
+          if ($LASTEXITCODE -ne 0) { throw "lock360 qa-audit failed" }
+          python -X utf8 scripts\lock360.py deploy-gate --output tests\fixtures\deploy_good.txt
+          if ($LASTEXITCODE -ne 0) { throw "lock360 deploy-gate failed" }
 
       - name: Skill supply-chain audit (core strict + pack, Windows)
         run: |

@@ -1,4 +1,4 @@
-# 🔵 Cursor — Lock360 `v2.9` كقاعدة مشروع (`.mdc`)
+# 🔵 Cursor — Lock360 `v3.0` كقاعدة مشروع (`.mdc`)
 
 > **الاصطلاح (مؤكد من توثيق Cursor):** قواعد المشروع تعيش في `.cursor/rules/` بامتداد `.mdc` إلزامياً (ملف `.md` عادي يُتجاهل). الـ frontmatter يتحكم في التفعيل: `alwaysApply: false` + `description` ⬅ الوكيل يقرر التفعيل حسب الوصف (`Apply Intelligently`)؛ أو `globs` ⬅ تفعيل عند فتح ملفات مطابقة. كما يدعم Cursor ملف `AGENTS.md` عادي في الجذر كبديل بسيط. التوثيق: `https://cursor.com/docs/context/rules`
 
@@ -16,4 +16,4 @@ cp ~/CORE-PROMPT-360/platforms/cursor/lock360.mdc .cursor/rules/lock360.mdc
 
 الصق محتوى [`../opencode/AGENTS.md.snippet`](../opencode/AGENTS.md.snippet) في `AGENTS.md` بجذر المشروع — Cursor يقرأه بدون frontmatter.
 
-> النواة الكاملة: `https://raw.githubusercontent.com/wewe00220033/CORE-PROMPT-360/v2.9/gist/01-CORE-PROMPT-360-v2.md`
+> النواة الكاملة: `https://raw.githubusercontent.com/wewe00220033/CORE-PROMPT-360/v3.0/gist/01-CORE-PROMPT-360-v3.md`

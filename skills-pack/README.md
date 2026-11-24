@@ -1,9 +1,9 @@
 <div dir="rtl">
 
-# 🧰 `skills-pack/` — حزمة المهارات والقواعد والـ Workflows الكاملة (`v2.9`)
+# 🧰 `skills-pack/` — حزمة المهارات والقواعد والـ Workflows الكاملة (`v3.0`)
 
 > **الغرض:** تجميع جميع المهارات (`24` مهارة بالكامل: `00-lock360-zero-gaps` في جذر المستودع + `23` مهارة إضافية هنا) مع مسارات العمل (`3` workflows) والقواعد (`3` rules) وقالب `GEMINI.template.md` المنظّف من أي أسرار أو مسارات شخصية، لنقل بيئة العمل كاملة لأي جهاز بضغطة زر.
-> **سلسلة التوريد (`v2.9`):** قبل تثبيت الحزمة في بيئة حساسة شغّل `python3 scripts/lock360.py audit-skill skills-pack/skills` (صفر `FAIL` مطلوب؛ `WARN` يُدوَّن)، وأكمل الحكم البشري في [`references/SKILL_AUDIT_CHECKLIST.md`](../references/SKILL_AUDIT_CHECKLIST.md). الفهرس الكامل ومسار الاختيار السريع في [`references/COMPLETE_SKILLS_CATALOG.md`](../references/COMPLETE_SKILLS_CATALOG.md).
+> **سلسلة التوريد (`v3.0`):** قبل تثبيت الحزمة في بيئة حساسة شغّل `python3 scripts/lock360.py audit-skill skills-pack/skills` (صفر `FAIL` مطلوب؛ `WARN` يُدوَّن)، وأكمل الحكم البشري في [`references/SKILL_AUDIT_CHECKLIST.md`](../references/SKILL_AUDIT_CHECKLIST.md). الفهرس الكامل ومسار الاختيار السريع في [`references/COMPLETE_SKILLS_CATALOG.md`](../references/COMPLETE_SKILLS_CATALOG.md).
 
 ---
 
@@ -12,7 +12,7 @@
 - **المهارة المحورية في الجذر (`1`):** [`00-lock360-zero-gaps`](../SKILL.md) + [`workflows/00-lock360-zero-gaps.md`](../workflows/00-lock360-zero-gaps.md).
 - **المهارات التأسيسية والهندسية المخصصة (`9` داخل `skills/`):**
   - `00-architect-sre`: دستور المعماري ومفتش الأمان والـ SRE والصمامات الـ 86.
-  - `00-architectural-cards-protocol`: بروتوكول الكروت المعمارية والزتونة المزدوجة.
+  - `00-architectural-cards-protocol`: بروتوكول الكروت المعمارية والخلاصة المركزة المزدوجة.
   - `00-bolla-constitution`: دستور الحوكمة الهندسي الموحد (T0/T1/T2) والقوانين العشرة الذهبية.
   - `00-dual-agent-copilot`: تشغيل ومزامنة الوكلاء المتوازيين وقاموس الجودة.
   - `00-evidence-inspector`: فحص الأدلة والتحقق الإلزامي بالسطور.
