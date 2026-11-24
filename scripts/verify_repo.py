@@ -27,7 +27,14 @@ SELF_REL = "scripts/verify_repo.py"
 MANIFEST_REL = "MANIFEST.sha256"
 
 TEXT_EXTS = {".md", ".sh", ".py", ".yml", ".yaml", ".snippet", ".mdc",
-             ".json", ".svg", ".gitattributes", ".gitignore"}
+             ".json", ".svg", ".txt", ".gitattributes", ".gitignore"}
+# Test fixtures intentionally contain tables, placeholders and old version strings
+# (red-green mutations) - they are exempt from (f)(g)(j) only; (a)(b)(d) stay strict.
+FIXTURES_PREFIX = "tests/fixtures/"
+
+
+def is_fixture(rel):
+    return rel.startswith(FIXTURES_PREFIX)
 TEXT_NAMES = {"VERSION", "LICENSE", ".gitattributes", ".gitignore", MANIFEST_REL}
 
 RESULTS = []  # (status, check, message)
@@ -298,7 +305,7 @@ def check_version(files):
     for rel in files:
         if not (is_text(rel) or is_ps1(rel)):
             continue
-        if rel == "gist/04-CHANGELOG.md" or rel.startswith("archive/") or is_pack_asset(rel):
+        if rel == "gist/04-CHANGELOG.md" or rel.startswith("archive/") or is_pack_asset(rel) or is_fixture(rel):
             continue
         for lineno, line in enumerate(read_text(rel).split("\n"), 1):
             for m in VERSION_RE.finditer(line):
@@ -336,7 +343,7 @@ def check_placeholders(files):
     pats = placeholder_patterns()
     scanned = 0
     for rel in files:
-        if not (is_text(rel) or is_ps1(rel)):
+        if not (is_text(rel) or is_ps1(rel)) or is_fixture(rel):
             continue
         scanned += 1
         for lineno, line in enumerate(read_text(rel).split("\n"), 1):
@@ -444,7 +451,7 @@ def check_md_tables(files):
     bad = 0
     checked = 0
     for rel in files:
-        if not rel.lower().endswith(".md") or is_pack_md(rel):
+        if not rel.lower().endswith(".md") or is_pack_md(rel) or is_fixture(rel):
             continue
         checked += 1
         for lineno, line in enumerate(read_text(rel).split("\n"), 1):
@@ -609,6 +616,41 @@ def check_issue_templates(files):
     return bad
 
 
+# ---------------------------------------------------------------- (m) lock360 engine
+def check_lock360_engine():
+    rel = "scripts/lock360.py"
+    path = os.path.join(ROOT, rel)
+    if not os.path.isfile(path):
+        report("SKIP", "m", "%s not found" % rel)
+        return 0
+    bad = 0
+    oks = []
+    for args, label in ((["--selftest"], "selftest"), (["eval"], "eval")):
+        try:
+            p = subprocess.run([sys.executable, "-X", "utf8", path] + args, cwd=ROOT,
+                               capture_output=True, text=True, encoding="utf-8",
+                               errors="replace", timeout=300)
+        except Exception as exc:
+            bad += 1
+            report("FAIL", "m", "lock360.py %s could not run: %s" % (label, exc))
+            continue
+        summary = ""
+        for line in (p.stdout or "").strip().split("\n")[::-1]:
+            if line.startswith("lock360 "):
+                summary = line.strip()
+                break
+        if p.returncode != 0:
+            bad += 1
+            fails = [l.strip() for l in (p.stdout or "").split("\n") if l.startswith("[FAIL]")]
+            report("FAIL", "m", "lock360.py %s rc=%d: %s" % (label, p.returncode,
+                   " | ".join(fails[:5]) or (p.stderr or "").strip()[-300:]))
+        else:
+            oks.append(summary or ("%s rc=0" % label))
+    if not bad:
+        report("PASS", "m", "lock360.py OK: %s" % " | ".join(oks))
+    return bad
+
+
 # ---------------------------------------------------------------- main
 USAGE = "usage: verify_repo.py [--update-manifest] [-h]"
 
@@ -643,6 +685,7 @@ def main(argv):
     fails += check_md_tables(files)
     fails += check_manifest()
     fails += check_issue_templates(files)
+    fails += check_lock360_engine()
     n_pass = sum(1 for s, _, _ in RESULTS if s == "PASS")
     n_fail = sum(1 for s, _, _ in RESULTS if s == "FAIL")
     n_skip = sum(1 for s, _, _ in RESULTS if s == "SKIP")

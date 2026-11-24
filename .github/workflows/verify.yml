@@ -20,6 +20,34 @@ jobs:
       - name: Bash syntax check
         run: bash -n scripts/install.sh
 
+      - name: Lock360 engine (selftest + eval)
+        run: |
+          python3 scripts/lock360.py --selftest
+          python3 scripts/lock360.py eval
+
+      - name: OpenCode round-trip (bash)
+        run: |
+          set -euo pipefail
+          OC="$RUNNER_TEMP/oc"
+          mkdir -p "$OC"
+          printf '# my custom rules\n- keep me\n' > "$OC/AGENTS.md"
+          printf '{"$schema":"https://opencode.ai/config.json","model":"x"}\n' > "$OC/opencode.json"
+          cp "$OC/opencode.json" "$RUNNER_TEMP/opencode.json.orig"
+          bash scripts/install.sh --opencode --opencode-root "$OC" --target "$RUNNER_TEMP/oc_gemini"
+          test -f "$OC/skills/00-lock360-zero-gaps/SKILL.md"
+          test -f "$OC/skills/00-lock360-zero-gaps/scripts/lock360.py"
+          test -f "$OC/skills/00-lock360-zero-gaps/prompts/WEAK-MODEL-BOOSTER.md"
+          test ! -f "$OC/skills/00-lock360-zero-gaps/scripts/verify_repo.py"
+          grep -q 'keep me' "$OC/AGENTS.md"
+          test "$(grep -c 'LOCK360_START' "$OC/AGENTS.md")" = "1"
+          cmp "$OC/opencode.json" "$RUNNER_TEMP/opencode.json.orig"
+          bash scripts/install.sh --uninstall --opencode --opencode-root "$OC" --target "$RUNNER_TEMP/oc_gemini"
+          test ! -d "$OC/skills/00-lock360-zero-gaps"
+          grep -q 'keep me' "$OC/AGENTS.md"
+          test "$(grep -c 'LOCK360_START' "$OC/AGENTS.md" || true)" = "0"
+          cmp "$OC/opencode.json" "$RUNNER_TEMP/opencode.json.orig"
+          bash scripts/install.sh --uninstall --opencode --opencode-root "$OC" --target "$RUNNER_TEMP/oc_gemini"
+
       - name: Install round-trip (bash)
         run: |
           set -euo pipefail
@@ -91,6 +119,41 @@ jobs:
           $ErrorActionPreference = "Stop"
           python -X utf8 scripts\verify_repo.py
           if ($LASTEXITCODE -ne 0) { throw "verify_repo.py failed on Windows with $LASTEXITCODE" }
+
+      - name: Lock360 engine (selftest + eval, Windows)
+        run: |
+          $ErrorActionPreference = "Stop"
+          python -X utf8 scripts\lock360.py --selftest
+          if ($LASTEXITCODE -ne 0) { throw "lock360 selftest failed" }
+          python -X utf8 scripts\lock360.py eval
+          if ($LASTEXITCODE -ne 0) { throw "lock360 eval failed" }
+
+      - name: OpenCode round-trip (Windows PowerShell 5.1)
+        run: |
+          $ErrorActionPreference = "Stop"
+          $oc = Join-Path $env:RUNNER_TEMP "oc"
+          New-Item -ItemType Directory -Path $oc -Force | Out-Null
+          [System.IO.File]::WriteAllText((Join-Path $oc "AGENTS.md"), "# my custom rules`n- keep me`n")
+          $cfg = '{"$schema":"https://opencode.ai/config.json","model":"x"}'
+          [System.IO.File]::WriteAllText((Join-Path $oc "opencode.json"), $cfg)
+          $gem = Join-Path $env:RUNNER_TEMP "oc_gemini"
+          powershell -NoProfile -ExecutionPolicy Bypass -File scripts\install.ps1 -OpenCode -OpenCodeRoot $oc -TargetRoot $gem
+          if ($LASTEXITCODE -ne 0) { throw "install.ps1 -OpenCode exited with $LASTEXITCODE" }
+          foreach ($rel in @("skills\00-lock360-zero-gaps\SKILL.md", "skills\00-lock360-zero-gaps\scripts\lock360.py", "skills\00-lock360-zero-gaps\prompts\WEAK-MODEL-BOOSTER.md")) {
+            if (-not (Test-Path -LiteralPath (Join-Path $oc $rel))) { throw "missing: $rel" }
+          }
+          if (Test-Path -LiteralPath (Join-Path $oc "skills\00-lock360-zero-gaps\scripts\verify_repo.py")) { throw "verify_repo.py must not be installed" }
+          $a = [System.IO.File]::ReadAllText((Join-Path $oc "AGENTS.md"))
+          if ($a -notmatch "keep me") { throw "custom AGENTS.md line lost after install" }
+          if (([regex]::Matches($a, "LOCK360_START")).Count -ne 1) { throw "expected one LOCK360 block" }
+          if ([System.IO.File]::ReadAllText((Join-Path $oc "opencode.json")) -ne $cfg) { throw "opencode.json was modified" }
+          powershell -NoProfile -ExecutionPolicy Bypass -File scripts\install.ps1 -Uninstall -OpenCode -OpenCodeRoot $oc -TargetRoot $gem
+          if ($LASTEXITCODE -ne 0) { throw "install.ps1 -Uninstall -OpenCode exited with $LASTEXITCODE" }
+          if (Test-Path -LiteralPath (Join-Path $oc "skills\00-lock360-zero-gaps")) { throw "OpenCode skill still present" }
+          $a = [System.IO.File]::ReadAllText((Join-Path $oc "AGENTS.md"))
+          if ($a -notmatch "keep me") { throw "custom AGENTS.md line lost after uninstall" }
+          if ($a -match "LOCK360_START") { throw "LOCK360 block still present" }
+          if ([System.IO.File]::ReadAllText((Join-Path $oc "opencode.json")) -ne $cfg) { throw "opencode.json was modified on uninstall" }
 
       - name: Install round-trip (Windows PowerShell 5.1)
         run: |

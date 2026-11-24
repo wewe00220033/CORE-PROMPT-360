@@ -5,9 +5,11 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 SKILL_NAME="00-lock360-zero-gaps"
 TARGET_ROOT="${HOME}/.gemini"
+OPENCODE_ROOT="${XDG_CONFIG_HOME:-${HOME}/.config}/opencode"
 WITH_WORKFLOW=0
 WITH_RULE=0
 WITH_PACK=0
+WITH_OPENCODE=0
 UNINSTALL=0
 
 while [ "$#" -gt 0 ]; do
@@ -16,14 +18,20 @@ while [ "$#" -gt 0 ]; do
     --with-workflow) WITH_WORKFLOW=1 ;;
     --with-rule) WITH_RULE=1 ;;
     --with-pack) WITH_PACK=1 ;;
+    --opencode) WITH_OPENCODE=1 ;;
     --uninstall) UNINSTALL=1 ;;
     --target)
       shift
       [ "$#" -gt 0 ] || { echo "error: --target requires a path" >&2; exit 2; }
       TARGET_ROOT="$1"
       ;;
+    --opencode-root)
+      shift
+      [ "$#" -gt 0 ] || { echo "error: --opencode-root requires a path" >&2; exit 2; }
+      OPENCODE_ROOT="$1"
+      ;;
     -h|--help)
-      echo "Usage: bash scripts/install.sh [--all | --with-workflow | --with-rule] [--with-pack] [--uninstall] [--target DIR]"
+      echo "Usage: bash scripts/install.sh [--all | --with-workflow | --with-rule] [--with-pack] [--opencode] [--uninstall] [--target DIR] [--opencode-root DIR]"
       exit 0
       ;;
     *)
@@ -37,6 +45,8 @@ done
 SKILL_DST="${TARGET_ROOT}/config/skills/${SKILL_NAME}"
 WF_DST="${TARGET_ROOT}/config/workflows/00-lock360-zero-gaps.md"
 GEMINI_FILE="${TARGET_ROOT}/GEMINI.md"
+OC_SKILL_DST="${OPENCODE_ROOT}/skills/${SKILL_NAME}"
+OC_AGENTS_FILE="${OPENCODE_ROOT}/AGENTS.md"
 
 # Portable form when TargetRoot is the default (~/.gemini); absolute SKILL.md path otherwise.
 DEFAULT_ROOT="${HOME%/}/.gemini"
@@ -45,10 +55,17 @@ if [ "${TARGET_ROOT%/}" = "$DEFAULT_ROOT" ]; then
 else
   SNIPPET_SKILL_PATH="${SKILL_DST}/SKILL.md"
 fi
+DEFAULT_OC_ROOT="${HOME%/}/.config/opencode"
+if [ "${OPENCODE_ROOT%/}" = "$DEFAULT_OC_ROOT" ]; then
+  OC_SNIPPET_SKILL_PATH="~/.config/opencode/skills/${SKILL_NAME}/SKILL.md"
+else
+  OC_SNIPPET_SKILL_PATH="${OC_SKILL_DST}/SKILL.md"
+fi
 
-# Python is required only for --with-rule/--all/--uninstall; resolved BEFORE any copy (no half-install).
+# Python is required only for --with-rule/--all/--opencode/--uninstall; resolved BEFORE any copy (no half-install).
 PY=""
 require_python() {
+  [ -n "$PY" ] && return 0
   # Try python3 then python; keep the first one that actually runs (skips broken launchers / store stubs).
   local cand
   for cand in python3 python; do
@@ -58,24 +75,27 @@ require_python() {
       return 0
     fi
   done
-  echo "error: a working Python >= 3.6 (python3 or python) is required for --with-rule/--all/--uninstall" >&2
+  echo "error: a working Python >= 3.6 (python3 or python) is required for --with-rule/--all/--opencode/--uninstall" >&2
   exit 2
 }
 
-update_gemini_block() {
-  local mode="$1" # install | remove
-  "$PY" - "$GEMINI_FILE" "$mode" "$SNIPPET_SKILL_PATH" <<'PY'
+# update_marker_block FILE MODE SKILL_PATH  (MODE: install | remove)
+# Only the <!-- LOCK360_START --> ... <!-- LOCK360_END --> block is touched; every other line is preserved.
+update_marker_block() {
+  local file="$1" mode="$2" skill_path="$3"
+  require_python
+  "$PY" - "$file" "$mode" "$skill_path" <<'PY'
 import os, re, shutil, sys
 
 path, mode, skill_path = sys.argv[1], sys.argv[2], sys.argv[3]
 start = "<!-- LOCK360_START -->"
 end = "<!-- LOCK360_END -->"
 snippet = """<!-- LOCK360_START -->
-## 🔒 بروتوكول التقفيل الشامل 360° (Lock360 v2.6)
+## 🔒 بروتوكول التقفيل الشامل 360° (Lock360 v2.7)
 
 - **المصدر الموحد:** `00-lock360-zero-gaps` (`__LOCK360_SKILL_PATH__` · `gist/01-CORE-PROMPT-360-v2.md` · `workflows/00-lock360-zero-gaps.md`).
 - **`L1 Auto-Guard` (`P` تلقائياً بعد الأعمال غير التافهة):** راجع المتبقي/الحدود، أمان التسليم والتزامن، الدليل القاطع بعد آخر تعديل، واسأل المستخدم عن أي غموض بدل التخمين.
-- **`L2 / L3`:** عند طلب قفّل 360 / بالضبة والمفتاح / 1600°-10000° / `/lock360` حمّل المهارة ونفّذ الترس المناسب (`S / M / L`)، مع الالتزام بقاعدة `RTL-Safe` (بلا جداول `| col |` في الشات).
+- **`L2 / L3`:** عند طلب قفّل 360 / بالضبة والمفتاح / 1600°-10000° / `/lock360` حمّل المهارة ونفّذ الترس المناسب (`S / M / L`)، ومرّر المخرج على `scripts/lock360.py audit` قبل الإغلاق، مع الالتزام بقاعدة `RTL-Safe` (بلا جداول `| col |` في الشات).
 <!-- LOCK360_END -->"""
 snippet = snippet.replace("__LOCK360_SKILL_PATH__", skill_path)
 
@@ -114,10 +134,12 @@ os.replace(tmp, path)
 PY
 }
 
-validate_gemini_markers() {
+# validate_markers FILE - refuse early when the marker pair is malformed.
+validate_markers() {
+  local file="$1"
   require_python
-  [ -f "$GEMINI_FILE" ] || return 0
-  "$PY" - "$GEMINI_FILE" <<'PY'
+  [ -f "$file" ] || return 0
+  "$PY" - "$file" <<'PY'
 import re, sys
 p = sys.argv[1]
 txt = open(p, "r", encoding="utf-8").read().replace("\r\n", "\n")
@@ -127,6 +149,32 @@ if sc != ec or sc > 1:
     sys.stderr.write(f"Refusing to modify {p}: malformed LOCK360 markers (start={sc}, end={ec})\n")
     sys.exit(3)
 PY
+}
+
+# copy_skill_payload DST - SKILL.md, README.md, gist/, references/, prompts/, scripts/lock360.py only.
+copy_skill_payload() {
+  local dst="$1"
+  mkdir -p "$dst"
+  cp "$REPO_ROOT/SKILL.md" "$dst/SKILL.md"
+  [ -f "$REPO_ROOT/README.md" ] && cp "$REPO_ROOT/README.md" "$dst/README.md"
+  rm -rf "$dst/gist" "$dst/references" "$dst/prompts" "$dst/scripts"
+  cp -R "$REPO_ROOT/gist" "$dst/gist"
+  cp -R "$REPO_ROOT/references" "$dst/references"
+  [ -d "$REPO_ROOT/prompts" ] && cp -R "$REPO_ROOT/prompts" "$dst/prompts"
+  if [ -f "$REPO_ROOT/scripts/lock360.py" ]; then
+    mkdir -p "$dst/scripts"
+    cp "$REPO_ROOT/scripts/lock360.py" "$dst/scripts/lock360.py"
+    chmod +x "$dst/scripts/lock360.py" 2>/dev/null || true
+  fi
+  return 0
+}
+
+# backup_dir SRC_DIR BAK_ROOT - copy an existing install aside before touching it.
+backup_dir() {
+  local src="$1" bak="$2"
+  mkdir -p "$bak"
+  cp -R "$src" "${bak}/${SKILL_NAME}"
+  return 0
 }
 
 PACK_ROOT="${REPO_ROOT}/skills-pack"
@@ -206,6 +254,7 @@ install_pack() {
       echo "[lock360] Existing GEMINI.md preserved (sanitized template available at skills-pack/GEMINI.template.md)"
     fi
   fi
+  return 0
 }
 
 uninstall_pack() {
@@ -267,12 +316,39 @@ uninstall_pack() {
   return 0
 }
 
+# OpenCode: skill under <root>/skills/<name>, marker block in <root>/AGENTS.md. Never touches opencode.json / cli.json.
+install_opencode() {
+  validate_markers "$OC_AGENTS_FILE"
+  if [ -d "$OC_SKILL_DST" ]; then
+    local bak="${OPENCODE_ROOT}/.backup_lock360_opencode_$(date +%Y%m%d_%H%M%S)"
+    backup_dir "$OC_SKILL_DST" "$bak"
+    echo "[lock360] Backed up existing OpenCode skill to: ${bak}/${SKILL_NAME}"
+  fi
+  copy_skill_payload "$OC_SKILL_DST"
+  echo "[lock360] Installed OpenCode skill to: $OC_SKILL_DST"
+  update_marker_block "$OC_AGENTS_FILE" "install" "$OC_SNIPPET_SKILL_PATH"
+  echo "[lock360] Updated LOCK360 block in: $OC_AGENTS_FILE (opencode.json / cli.json untouched)"
+  return 0
+}
+
+uninstall_opencode() {
+  validate_markers "$OC_AGENTS_FILE"
+  if [ -d "$OC_SKILL_DST" ]; then
+    local bak="${OPENCODE_ROOT}/.backup_lock360_opencode_uninstall_$(date +%Y%m%d_%H%M%S)"
+    backup_dir "$OC_SKILL_DST" "$bak"
+    echo "[lock360] Backed up OpenCode skill before uninstall: ${bak}/${SKILL_NAME}"
+    rm -rf "$OC_SKILL_DST"
+  fi
+  update_marker_block "$OC_AGENTS_FILE" "remove" "$OC_SNIPPET_SKILL_PATH"
+  echo "[lock360] Removed LOCK360 block from: $OC_AGENTS_FILE (other lines preserved)"
+  return 0
+}
+
 if [ "$UNINSTALL" -eq 1 ]; then
-  validate_gemini_markers
+  validate_markers "$GEMINI_FILE"
   if [ -d "$SKILL_DST" ]; then
     BAK="${TARGET_ROOT}/.backup_lock360_uninstall_$(date +%Y%m%d_%H%M%S)"
-    mkdir -p "$BAK"
-    cp -R "$SKILL_DST" "${BAK}/${SKILL_NAME}"
+    backup_dir "$SKILL_DST" "$BAK"
     echo "[lock360] Backed up skill before uninstall (preserves Extension Slots): ${BAK}/${SKILL_NAME}"
     rm -rf "$SKILL_DST"
   fi
@@ -280,28 +356,28 @@ if [ "$UNINSTALL" -eq 1 ]; then
   if [ "$WITH_PACK" -eq 1 ]; then
     uninstall_pack
   fi
-  update_gemini_block "remove"
+  if [ "$WITH_OPENCODE" -eq 1 ]; then
+    uninstall_opencode
+  fi
+  update_marker_block "$GEMINI_FILE" "remove" "$SNIPPET_SKILL_PATH"
   echo "[lock360] Uninstalled cleanly from: $TARGET_ROOT"
   exit 0
 fi
 
 if [ "$WITH_RULE" -eq 1 ]; then
-  validate_gemini_markers
+  validate_markers "$GEMINI_FILE"
+fi
+if [ "$WITH_OPENCODE" -eq 1 ]; then
+  validate_markers "$OC_AGENTS_FILE"
 fi
 
 if [ -d "$SKILL_DST" ]; then
   BAK="${TARGET_ROOT}/.backup_lock360_$(date +%Y%m%d_%H%M%S)"
-  mkdir -p "$BAK"
-  cp -R "$SKILL_DST" "${BAK}/${SKILL_NAME}"
+  backup_dir "$SKILL_DST" "$BAK"
   echo "[lock360] Backed up existing skill to: ${BAK}/${SKILL_NAME}"
 fi
 
-mkdir -p "$SKILL_DST"
-cp "$REPO_ROOT/SKILL.md" "$SKILL_DST/SKILL.md"
-[ -f "$REPO_ROOT/README.md" ] && cp "$REPO_ROOT/README.md" "$SKILL_DST/README.md"
-rm -rf "$SKILL_DST/gist" "$SKILL_DST/references"
-cp -R "$REPO_ROOT/gist" "$SKILL_DST/gist"
-cp -R "$REPO_ROOT/references" "$SKILL_DST/references"
+copy_skill_payload "$SKILL_DST"
 echo "[lock360] Installed skill to: $SKILL_DST"
 
 if [ "$WITH_WORKFLOW" -eq 1 ] && [ -f "$REPO_ROOT/workflows/00-lock360-zero-gaps.md" ]; then
@@ -314,8 +390,12 @@ if [ "$WITH_PACK" -eq 1 ]; then
   install_pack
 fi
 
+if [ "$WITH_OPENCODE" -eq 1 ]; then
+  install_opencode
+fi
+
 if [ "$WITH_RULE" -eq 1 ]; then
-  update_gemini_block "install"
+  update_marker_block "$GEMINI_FILE" "install" "$SNIPPET_SKILL_PATH"
   echo "[lock360] Updated LOCK360 rule block in: $GEMINI_FILE"
 fi
 
