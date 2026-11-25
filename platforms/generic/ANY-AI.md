@@ -1,4 +1,4 @@
-# 🌐 استخدام Lock360 `v3.0` مع أي ذكاء اصطناعي (`ANY-AI.md`)
+# 🌐 استخدام Lock360 `v3.1` مع أي ذكاء اصطناعي (`ANY-AI.md`)
 
 > سواء كنت تستخدم ChatGPT أو Claude أو Gemini أو DeepSeek أو نموذجاً محلياً بدون دعم المهارات: هذه هي قواعد التشغيل العالمية الأربعة.
 
@@ -9,6 +9,6 @@
 3. **بوابة الفهم `Q-Contract` (`3.12`):** رقّم الأسئلة `[Q1]`..`[Qn]`، وفي كل رد متابعة افتح بـ `📋 سجل الأسئلة — متبقي X من أصل Y` و`🚦 بوابة الفهم: HOLD / GO` (لا تنفيذ تحت `HOLD` إلا خطوات `NR` المستقلة).
 4. **النقد والملخص وسلامة العرض:** اختم `M/L` بـ `3.15 الناقد الصريح بعيون جديدة` و`3.16 الخلاصة المنظمة`، وامنع جداول `| col |` نهائياً.
 
-## 🔗 رابط النواة الموحدة (`v3.0`)
-- [`https://raw.githubusercontent.com/wewe00220033/CORE-PROMPT-360/v3.0/gist/01-CORE-PROMPT-360-v3.md`](https://raw.githubusercontent.com/wewe00220033/CORE-PROMPT-360/v3.0/gist/01-CORE-PROMPT-360-v3.md)
+## 🔗 رابط النواة الموحدة (`v3.1`)
+- [`https://raw.githubusercontent.com/wewe00220033/CORE-PROMPT-360/v3.1/gist/01-CORE-PROMPT-360-v3.md`](https://raw.githubusercontent.com/wewe00220033/CORE-PROMPT-360/v3.1/gist/01-CORE-PROMPT-360-v3.md)
 - للنماذج الخفيفة استخدم [`../../prompts/WEAK-MODEL-BOOSTER.md`](../../prompts/WEAK-MODEL-BOOSTER.md) · وللبدء الفوري [`../../prompts/QUICK-START.md`](../../prompts/QUICK-START.md).

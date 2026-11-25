@@ -1,6 +1,6 @@
-# 🧪 التقييم والضوابط — Eval & Guardrails (`v3.0`)
+# 🧪 التقييم والضوابط — Eval & Guardrails (`v3.1`)
 
-> **القاعدة:** لا تثق بمخرج لم يُختبر، ولا تطلق قدرة بلا ضابط. في `v3.0` كل بوابة هنا لها **تنفيذ حتمي** في `scripts/lock360.py` و`144` حالة أحمر-أخضر في `tests/eval_cases.json` — هذا الملف يشرح كيف تُشغَّل وتُقرأ، ولا يكرر الكتالوج.
+> **القاعدة:** لا تثق بمخرج لم يُختبر، ولا تطلق قدرة بلا ضابط. في `v3.1` كل بوابة هنا لها **تنفيذ حتمي** في `scripts/lock360.py` و`152` حالة أحمر-أخضر في `tests/eval_cases.json` — هذا الملف يشرح كيف تُشغَّل وتُقرأ، ولا يكرر الكتالوج.
 
 ---
 
@@ -19,9 +19,9 @@
 
 ## 2) بوابات جودة المهارة (Skill Quality Gates) ⬅ حالات الاختبار
 
-- **Gate 1 — دقة التفعيل (`Trigger Accuracy`):** حالات `R-01..32` في `eval_cases.json`: إيجابية، ترقية إجبارية (استقالة / زواج / إنتاج ⬅ `L`)، رصد القارئ والنشر (`audience / depth / deploy`)، عزل `faith` عن الطلبات الدنيوية، و**سلبية `Anti Over-Trigger`** (`MECE` وحدها، `Edge Cases`, سؤال عادي ⬅ `L1/P` أو لا شيء).
-- **Gate 2 — الالتزام بالمنهج (`Compliance`):** حالات `A-01..79` على فكستشرات `S/M/L/P` و`m_nonprogrammer_good` + طفرات لكل فحص: مراحل `3.1..3.16`، سقف `350` كلمة في `S`، عمق `M <= 4`، الوسوم، حدود الثقة وشرط الانقلاب، `👤 القارئ + بالبلدي:`، `Q-*` (`qa-audit`) الـ 12، تناقضات `SC-1..6`، وبوابة النشر `DG-01..04`.
-- **Gate 3 — الحدود والسلامة (`Boundary / Safety`):** `A-SECRET` (أسرار)، `F-EXPERT-ESCALATION` (طب / فتوى / عقد بلا مختص)، `F-ABSOLUTE-CLAIM` (كمال مطلق)، `A-UNKNOWN-CLOSED` (اكتمال مع مجهول قائم)، `A-LEGACY-LEXICON` / `A-LENS-BLEED`.
+- **Gate 1 — دقة التفعيل (`Trigger Accuracy`):** حالات `R-01..37` في `eval_cases.json`: إيجابية (بما فيها `جميع الجوانب / الثغرات / الدبة والمفتاح`)، ترقية إجبارية (استقالة / زواج / إنتاج ⬅ `L`)، رصد القارئ والبوتات والأعطال والنشر (`audience / depth / deploy`)، عزل `faith` عن الطلبات الدنيوية، و**سلبية `Anti Over-Trigger`**.
+- **Gate 2 — الالتزام بالمنهج (`Compliance`):** حالات `A-01..82` على فكستشرات `S/M/L/P` و`m_nonprogrammer_good` + طفرات لكل فحص: مراحل `3.1..3.16`، سقف `350` كلمة في `S`، عمق `M <= 6`، الوسوم، حدود الثقة وشرط الانقلاب، `👤 القارئ + بالبلدي:`، `Q-*` (`qa-audit`) الـ 12، تناقضات `SC-1..6`، وبوابة النشر `DG-01..04`.
+- **Gate 3 — الحدود والسلامة (`Boundary / Safety`):** `A-SECRET` (أسرار `sk-/AIza/gsk_/hf_/xox/api_hash/CVV` + بطاقات Luhn PAN)، `F-EXPERT-ESCALATION` (طب / فتوى / عقد بلا مختص)، `F-ABSOLUTE-CLAIM` (كمال مطلق)، `A-UNKNOWN-CLOSED` (اكتمال مع مجهول قائم)، `A-LEGACY-LEXICON` / `A-LENS-BLEED`.
 - **Gate 4 — الأثر (`Outcome Lift`):** قارن نفس المهمة مع وبدون Lock360؛ سجّل *"ما الذي كان سيفوت"* كدليل تحسن — هذه البوابة بشرية وتُسجَّل عبر `/patch-360`.
 - **Gate 0 — التزامن (`sync`):** حالة `S-01` تفشل لو اختلفت كلمات `SKILL.md` المفتاحية عن جداول المحرك؛ `S-02` تفشل لو تجاوز `SKILL.md` 115 سطراً.
 - **Gate 5 — سلسلة توريد المهارات (`Skill Supply Chain`):** حالات `SA-01..09` على `audit-skill`: المهارة الأساسية تمر صارمة (`SA-01`)، وطفرات داخل مجلد مؤقت يجب أن تفشل (`SA-FRONTMATTER / TROJAN-BIDI / EXEC-PIPE / SECRET / INJECTION / LEGACY-LEXICON`) بينما تمر كتلة `LENS-5` المعزولة (`SA-08`). الحكم البشري المكمّل في [`./SKILL_AUDIT_CHECKLIST.md`](./SKILL_AUDIT_CHECKLIST.md).
@@ -32,7 +32,7 @@
 
 ```bash
 python3 scripts/lock360.py --selftest            # اختبارات مدمجة بلا ملفات خارجية
-python3 scripts/lock360.py eval                  # 144 حالة أحمر-أخضر (R/A/Q/DG/S/SA)
+python3 scripts/lock360.py eval                  # 152 حالة أحمر-أخضر (R/A/Q/DG/S/SA) — أو python -X utf8 على Windows
 python3 scripts/lock360.py qa-audit --output <رد> --prev <سابق> [--request <رد_المستخدم>]
 python3 scripts/lock360.py deploy-gate --output <خطة_النشر>
 python3 scripts/verify_repo.py                   # الفحوص (a)..(q) الشاملة للمستودع

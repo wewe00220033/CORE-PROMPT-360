@@ -1,4 +1,4 @@
-# 🟢 Antigravity — تثبيت Lock360 `v3.0` كـ Skill
+# 🟢 Antigravity — تثبيت Lock360 `v3.1` كـ Skill
 
 > Antigravity هو البيئة الأصلية للحزمة: `SKILL.md` في جذر المستودع هو المحوّل (`Adapter`) الذي يحدد متى يعمل كل ترس. الدليل الكامل في [`../../README.md`](../../README.md).
 
@@ -17,7 +17,7 @@ bash ~/CORE-PROMPT-360/scripts/install.sh --all
 ```
 
 ماذا يفعل المثبّت ([`install.ps1`](../../scripts/install.ps1) / [`install.sh`](../../scripts/install.sh)):
-- ينسخ المهارة إلى `~/.gemini/config/skills/00-lock360-zero-gaps/` (مع نسخة احتياطية `.backup_lock360_*` لو كانت موجودة).
+- ينسخ المهارة (مع `tests/` ليعمل `eval` محلياً) إلى `~/.gemini/config/skills/00-lock360-zero-gaps/` (مع نسخة احتياطية `.backup_lock360_*` وتقليم تلقائي يحتفظ بأحدث نسختين فقط).
 - ينسخ `workflows/00-lock360-zero-gaps.md` إلى `~/.gemini/config/workflows/` لتفعيل `/lock360`.
 - يضيف الأسطر الأربعة أدناه داخل `~/.gemini/GEMINI.md` بين وسمي `LOCK360_START/END` فقط (يحفظ `.bak` ولا يلمس أي قاعدة أخرى).
 - الإلغاء الآمن: `-Uninstall` / `--uninstall` يزيل الكتلة والمجلدات ويحتفظ بنسخة احتياطية.
@@ -28,7 +28,7 @@ bash ~/CORE-PROMPT-360/scripts/install.sh --all
 
 ```markdown
 <!-- LOCK360_START -->
-## 🔒 بروتوكول التقفيل الشامل 360° (Lock360 v3.0)
+## 🔒 بروتوكول التقفيل الشامل 360° (Lock360 v3.1)
 
 - **المصدر الموحد:** `00-lock360-zero-gaps` (`~/.gemini/config/skills/00-lock360-zero-gaps/SKILL.md` · `gist/01-CORE-PROMPT-360-v3.md` · `workflows/00-lock360-zero-gaps.md`).
 - **`L1 Auto-Guard` (`P` تلقائياً بعد الأعمال غير التافهة):** راجع المتبقي/الحدود، أمان التسليم والتزامن، الدليل القاطع بعد آخر تعديل، واسأل المستخدم عن أي غموض بدل التخمين.
@@ -41,4 +41,4 @@ bash ~/CORE-PROMPT-360/scripts/install.sh --all
 - اكتب في الشات: `قفّل 360 على: [موضوع تجريبي]` ⬅ يجب أن يبدأ الرد من `3.1` بترس مُعلن وملف `👤 القارئ`.
 - بعد تعديل متعدد الملفات ⬅ يجب أن يظهر فحص `P` ذو البوابات الأربع تلقائياً.
 
-> رابط النواة المثبّت: `https://raw.githubusercontent.com/wewe00220033/CORE-PROMPT-360/v3.0/gist/01-CORE-PROMPT-360-v3.md`
+> رابط النواة المثبّت: `https://raw.githubusercontent.com/wewe00220033/CORE-PROMPT-360/v3.1/gist/01-CORE-PROMPT-360-v3.md`

@@ -44,8 +44,17 @@ function Write-Utf8Atomic([string]$Path, [string]$Text) {
     }
 }
 
-# Skill payload = SKILL.md, README.md, gist/, references/, prompts/, scripts/lock360.py only
+# Skill payload = SKILL.md, README.md, gist/, references/, prompts/, scripts/lock360.py, tests/
 # (never verify_repo.py nor the installers). Existing install is backed up under $BackupRoot first.
+function Invoke-PruneBackups([string]$Dir, [string]$Prefix, [int]$Keep = 2) {
+    if (-not (Test-Path -LiteralPath $Dir)) { return }
+    $dirs = @(Get-ChildItem -LiteralPath $Dir -Directory | Where-Object { $_.Name -like ($Prefix + "*") } | Sort-Object Name -Descending)
+    for ($i = $Keep; $i -lt $dirs.Count; $i++) {
+        Remove-Item -LiteralPath $dirs[$i].FullName -Recurse -Force -ErrorAction SilentlyContinue
+        Write-Host "[lock360] Pruned old backup: $($dirs[$i].Name)"
+    }
+}
+
 function Copy-SkillPayload([string]$Src, [string]$Dst, [string]$BackupRoot, [string]$BackupPrefix) {
     if (Test-Path -LiteralPath $Dst) {
         $bak = Join-Path $BackupRoot ($BackupPrefix + (Get-Date -Format "yyyyMMdd_HHmmss"))
@@ -61,7 +70,7 @@ function Copy-SkillPayload([string]$Src, [string]$Dst, [string]$BackupRoot, [str
             Copy-Item -LiteralPath $sp -Destination (Join-Path $Dst $f) -Force
         }
     }
-    foreach ($d in @("gist", "references", "prompts")) {
+    foreach ($d in @("gist", "references", "prompts", "tests")) {
         $sd = Join-Path $Src $d
         $dd = Join-Path $Dst $d
         if (Test-Path -LiteralPath $dd) { Remove-Item -LiteralPath $dd -Recurse -Force }
@@ -90,7 +99,7 @@ function Get-SnippetSkillPath([string]$Root, [string]$DefaultRoot, [string]$Port
 
 function Build-Snippet([string]$SkillPath) {
     # Literal lines are Unescape'd FIRST; the runtime skill path is concatenated AFTER (never passed through Unescape).
-    $head = [regex]::Unescape("## \uD83D\uDD12 \u0628\u0631\u0648\u062A\u0648\u0643\u0648\u0644 \u0627\u0644\u062A\u0642\u0641\u064A\u0644 \u0627\u0644\u0634\u0627\u0645\u0644 360\u00B0 (Lock360 v3.0)")
+    $head = [regex]::Unescape("## \uD83D\uDD12 \u0628\u0631\u0648\u062A\u0648\u0643\u0648\u0644 \u0627\u0644\u062A\u0642\u0641\u064A\u0644 \u0627\u0644\u0634\u0627\u0645\u0644 360\u00B0 (Lock360 v3.1)")
     $srcA = [regex]::Unescape("- **\u0627\u0644\u0645\u0635\u062F\u0631 \u0627\u0644\u0645\u0648\u062D\u062F:** ``00-lock360-zero-gaps`` (``")
     $srcB = [regex]::Unescape("`` \u00B7 ``gist/01-CORE-PROMPT-360-v3.md`` \u00B7 ``workflows/00-lock360-zero-gaps.md``).")
     $tail = @(
@@ -356,6 +365,9 @@ if ($Uninstall) {
         Remove-OpenCode
     }
     Update-MarkerBlock -File $GeminiFile -RemoveOnly $true -SkillPath $GeminiSnippetPath
+    Invoke-PruneBackups -Dir $TargetRoot -Prefix ".backup_lock360_uninstall_20"
+    Invoke-PruneBackups -Dir $TargetRoot -Prefix ".backup_lock360_pack_uninstall_20"
+    Invoke-PruneBackups -Dir $OpenCodeRoot -Prefix ".backup_lock360_opencode_uninstall_20"
     Write-Host "[lock360] Uninstall complete."
     exit 0
 }
@@ -392,4 +404,7 @@ if ($All -or $WithRule) {
     Update-MarkerBlock -File $GeminiFile -RemoveOnly $false -SkillPath $GeminiSnippetPath
 }
 
+Invoke-PruneBackups -Dir $TargetRoot -Prefix ".backup_lock360_20"
+Invoke-PruneBackups -Dir $TargetRoot -Prefix ".backup_lock360_pack_20"
+Invoke-PruneBackups -Dir $OpenCodeRoot -Prefix ".backup_lock360_opencode_20"
 Write-Host "[lock360] Done."

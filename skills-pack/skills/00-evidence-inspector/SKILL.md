@@ -69,12 +69,10 @@ Next: [Proceed / Retry / Escalate]
 
 ══ أنواع الأدلة ══
 
-| النوع | متى | مثال |
-|-------|-----|------|
-| 🔒 Attested Block | Governance / API / Remote | `python .governance/attest.py run -- ...` |
-| 📸 Screenshot | UI / browser tests | صورة للصفحة |
-| 📋 Test Output | script execution | stdout/stderr |
-| 📊 Logs | server/app logs | آخر 10 أسطر |
+- 🔒 **Attested Block** (`Governance / API / Remote`): `python .governance/attest.py run -- ...`
+- 📸 **Screenshot** (`UI / browser tests`): صورة للصفحة
+- 📋 **Test Output** (`script execution`): `stdout/stderr`
+- 📊 **Logs** (`server/app logs`): آخر 10 أسطر
 
 ---
 
@@ -92,9 +90,9 @@ Round 12: a *verdict* line (✅ claim_check: / ✅ attest: / MODE: …) is itsel
 Round 12: naming a bug in a file requires `attest run -- read_proof.py index <file>` in the same turn (Rule 28).
 Round 13 (R85-R89 — Rules 30-34): (a) PLAN_ROUND<N>.md is the FIRST commit; every chunk = commit + `export_bundle.sh` + upload, URL into the plan — no URL, no tick; if `setup_github_environment` has no token, export immediately, do not try `git push`. (b) "I was wrong / غلطت" needs a `mistakes.py record` row in MISTAKES.md. (c) "edited / عدّلت <file>" needs an `attest run -- edit_proof.py show <file>` block (not UNCHANGED). (d) The self-review is six fixed questions (`self_review.py`); all-✅ with no REMOTE proof fails. (e) `attest run -- precheck.py <turn> --source <human>` is pasted before sending; its sha is Q2.
 ```
-| 🔢 Metrics | performance | response time ms |
-| 📁 File Diff | code changes | git diff |
-| 🌐 Network | API calls | status codes |
+- 🔢 **Metrics** (`performance`): `response time ms`
+- 📁 **File Diff** (`code changes`): `git diff`
+- 🌐 **Network** (`API calls`): `status codes`
 
 ══ مقاييس النجاح ══
 ✅ كل PASS/FAIL معاه evidence

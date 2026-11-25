@@ -44,7 +44,10 @@ jobs:
           test -f "$OC/skills/00-lock360-zero-gaps/SKILL.md"
           test -f "$OC/skills/00-lock360-zero-gaps/scripts/lock360.py"
           test -f "$OC/skills/00-lock360-zero-gaps/prompts/WEAK-MODEL-BOOSTER.md"
+          test -f "$OC/skills/00-lock360-zero-gaps/tests/eval_cases.json"
           test ! -f "$OC/skills/00-lock360-zero-gaps/scripts/verify_repo.py"
+          python3 "$OC/skills/00-lock360-zero-gaps/scripts/lock360.py" eval
+          python3 "$OC/skills/00-lock360-zero-gaps/scripts/lock360.py" audit-skill "$OC/skills/00-lock360-zero-gaps" --strict
           grep -q 'keep me' "$OC/AGENTS.md"
           test "$(grep -c 'LOCK360_START' "$OC/AGENTS.md")" = "1"
           cmp "$OC/opencode.json" "$RUNNER_TEMP/opencode.json.orig"
@@ -158,10 +161,14 @@ jobs:
           $gem = Join-Path $env:RUNNER_TEMP "oc_gemini"
           powershell -NoProfile -ExecutionPolicy Bypass -File scripts\install.ps1 -OpenCode -OpenCodeRoot $oc -TargetRoot $gem
           if ($LASTEXITCODE -ne 0) { throw "install.ps1 -OpenCode exited with $LASTEXITCODE" }
-          foreach ($rel in @("skills\00-lock360-zero-gaps\SKILL.md", "skills\00-lock360-zero-gaps\scripts\lock360.py", "skills\00-lock360-zero-gaps\prompts\WEAK-MODEL-BOOSTER.md")) {
+          foreach ($rel in @("skills\00-lock360-zero-gaps\SKILL.md", "skills\00-lock360-zero-gaps\scripts\lock360.py", "skills\00-lock360-zero-gaps\prompts\WEAK-MODEL-BOOSTER.md", "skills\00-lock360-zero-gaps\tests\eval_cases.json")) {
             if (-not (Test-Path -LiteralPath (Join-Path $oc $rel))) { throw "missing: $rel" }
           }
           if (Test-Path -LiteralPath (Join-Path $oc "skills\00-lock360-zero-gaps\scripts\verify_repo.py")) { throw "verify_repo.py must not be installed" }
+          python -X utf8 (Join-Path $oc "skills\00-lock360-zero-gaps\scripts\lock360.py") eval
+          if ($LASTEXITCODE -ne 0) { throw "installed OpenCode skill eval failed" }
+          python -X utf8 (Join-Path $oc "skills\00-lock360-zero-gaps\scripts\lock360.py") audit-skill (Join-Path $oc "skills\00-lock360-zero-gaps") --strict
+          if ($LASTEXITCODE -ne 0) { throw "installed OpenCode skill audit-skill failed" }
           $a = [System.IO.File]::ReadAllText((Join-Path $oc "AGENTS.md"))
           if ($a -notmatch "keep me") { throw "custom AGENTS.md line lost after install" }
           if (([regex]::Matches($a, "LOCK360_START")).Count -ne 1) { throw "expected one LOCK360 block" }

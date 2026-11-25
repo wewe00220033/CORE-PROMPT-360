@@ -91,7 +91,7 @@ path, mode, skill_path = sys.argv[1], sys.argv[2], sys.argv[3]
 start = "<!-- LOCK360_START -->"
 end = "<!-- LOCK360_END -->"
 snippet = """<!-- LOCK360_START -->
-## 🔒 بروتوكول التقفيل الشامل 360° (Lock360 v3.0)
+## 🔒 بروتوكول التقفيل الشامل 360° (Lock360 v3.1)
 
 - **المصدر الموحد:** `00-lock360-zero-gaps` (`__LOCK360_SKILL_PATH__` · `gist/01-CORE-PROMPT-360-v3.md` · `workflows/00-lock360-zero-gaps.md`).
 - **`L1 Auto-Guard` (`P` تلقائياً بعد الأعمال غير التافهة):** راجع المتبقي/الحدود، أمان التسليم والتزامن، الدليل القاطع بعد آخر تعديل، واسأل المستخدم عن أي غموض بدل التخمين.
@@ -151,16 +151,33 @@ if sc != ec or sc > 1:
 PY
 }
 
-# copy_skill_payload DST - SKILL.md, README.md, gist/, references/, prompts/, scripts/lock360.py only.
+# prune_backups DIR PREFIX [KEEP=2] - keep only newest backups matching PREFIX*.
+prune_backups() {
+  local dir="$1" prefix="$2" keep="${3:-2}"
+  [ -d "$dir" ] || return 0
+  local i=0 d
+  while IFS= read -r d; do
+    [ -d "$d" ] || continue
+    i=$((i + 1))
+    if [ "$i" -gt "$keep" ]; then
+      rm -rf "$d"
+      echo "[lock360] Pruned old backup: $(basename "$d")"
+    fi
+  done < <(find "$dir" -maxdepth 1 -mindepth 1 -type d -name "${prefix}*" 2>/dev/null | sort -r)
+  return 0
+}
+
+# copy_skill_payload DST - SKILL.md, README.md, gist/, references/, prompts/, scripts/lock360.py, tests/.
 copy_skill_payload() {
   local dst="$1"
   mkdir -p "$dst"
   cp "$REPO_ROOT/SKILL.md" "$dst/SKILL.md"
   [ -f "$REPO_ROOT/README.md" ] && cp "$REPO_ROOT/README.md" "$dst/README.md"
-  rm -rf "$dst/gist" "$dst/references" "$dst/prompts" "$dst/scripts"
+  rm -rf "$dst/gist" "$dst/references" "$dst/prompts" "$dst/scripts" "$dst/tests"
   cp -R "$REPO_ROOT/gist" "$dst/gist"
   cp -R "$REPO_ROOT/references" "$dst/references"
   [ -d "$REPO_ROOT/prompts" ] && cp -R "$REPO_ROOT/prompts" "$dst/prompts"
+  [ -d "$REPO_ROOT/tests" ] && cp -R "$REPO_ROOT/tests" "$dst/tests"
   if [ -f "$REPO_ROOT/scripts/lock360.py" ]; then
     mkdir -p "$dst/scripts"
     cp "$REPO_ROOT/scripts/lock360.py" "$dst/scripts/lock360.py"
@@ -360,6 +377,9 @@ if [ "$UNINSTALL" -eq 1 ]; then
     uninstall_opencode
   fi
   update_marker_block "$GEMINI_FILE" "remove" "$SNIPPET_SKILL_PATH"
+  prune_backups "$TARGET_ROOT" ".backup_lock360_uninstall_20"
+  prune_backups "$TARGET_ROOT" ".backup_lock360_pack_uninstall_20"
+  prune_backups "$OPENCODE_ROOT" ".backup_lock360_opencode_uninstall_20"
   echo "[lock360] Uninstalled cleanly from: $TARGET_ROOT"
   exit 0
 fi
@@ -399,4 +419,7 @@ if [ "$WITH_RULE" -eq 1 ]; then
   echo "[lock360] Updated LOCK360 rule block in: $GEMINI_FILE"
 fi
 
+prune_backups "$TARGET_ROOT" ".backup_lock360_20"
+prune_backups "$TARGET_ROOT" ".backup_lock360_pack_20"
+prune_backups "$OPENCODE_ROOT" ".backup_lock360_opencode_20"
 echo "[lock360] Done."

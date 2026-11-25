@@ -5,7 +5,7 @@ description: دستور بُلّة المعماري لتقفيل الثغرات 
 
 # 🏛️ مهارة المعماري ومفتش الأمان والـ SRE — 00-architect-sre
 
-> **المرجع الدستوري الحاكم (The Mother File):** [`.agents/rules/00-architect-sre.md`](../../rules/00-architect-sre.md)  
+> **المرجع الدستوري الحاكم (The Mother File):** [`.agents/rules/dastoor_bolla_architect_sre.md`](../../rules/dastoor_bolla_architect_sre.md)  
 > **مسار العمل التنفيذي:** [`.agents/workflows/00-architect-sre.md`](../../workflows/00-architect-sre.md)
 
 ---

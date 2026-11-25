@@ -729,9 +729,9 @@ def check_eval_coverage():
     # SA-OVERTRIGGER and SA-SIZE are tested via negative assertions / dedicated checks
     missing = [cid for cid in required if cid not in covered and cid not in ("SA-OVERTRIGGER", "SA-SIZE", "DG-01")]
     bad = 0
-    if len(cases) < 130:
+    if len(cases) < 150:
         bad += 1
-        report("FAIL", "p", "eval_cases.json has %d cases < 130 minimum" % len(cases))
+        report("FAIL", "p", "eval_cases.json has %d cases < 150 minimum" % len(cases))
     if missing:
         bad += 1
         report("FAIL", "p", "check IDs missing red-green coverage in eval_cases.json: %s" % ", ".join(missing))
